@@ -1,3 +1,14 @@
+export interface PluginConfig {
+  apiKey: string;
+  endpoint: string;
+}
+
+export interface ServerResponse<T = any> {
+  success: boolean;
+  data?: T;
+  error?: string;
+}
+
 export interface WebsiteAnalysis {
   theme: string;
   type: string;
@@ -25,3 +36,6 @@ export interface ImageGenerationResponse {
   images: GeneratedImage[];
   message: string;
 }
+
+// Utils exports
+export * from "./utils";

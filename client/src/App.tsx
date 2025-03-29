@@ -1,7 +1,9 @@
-import { framer, CanvasNode, PublishInfo } from "framer-plugin";
+import { framer, CanvasNode } from "framer-plugin";
 import { useState, useEffect } from "react";
+import { WebsiteAnalysis } from "@framer-plugin/shared";
+
 import "./App.css";
-import { WebsiteAnalysis } from "../../server/src/schemas";
+
 framer.showUI({
   position: "top right",
   width: 240,
@@ -79,20 +81,20 @@ const findAllTexts = async () => {
   return [];
 };
 
-function usePublishInfo() {
-  const [publishInfo, setPublishInfo] = useState<PublishInfo>();
+// function usePublishInfo() {
+//   const [publishInfo, setPublishInfo] = useState<PublishInfo>();
 
-  useEffect(() => {
-    return framer.subscribeToPublishInfo(setPublishInfo);
-  }, []);
+//   useEffect(() => {
+//     return framer.subscribeToPublishInfo(setPublishInfo);
+//   }, []);
 
-  return publishInfo;
-}
+//   return publishInfo;
+// }
 
 export function App() {
   const selection = useSelection();
   const layer = selection.length === 1 ? "layer" : "layers";
-  const publishInfo = usePublishInfo();
+  // const publishInfo = usePublishInfo();
   // State to store all texts
   const [allTexts, setAllTexts] = useState<string[]>([]);
   const [websiteAnalysis, setWebsiteAnalysis] = useState<WebsiteAnalysis>();
@@ -250,24 +252,26 @@ export function App() {
           <p>{websiteAnalysis.targetAudience}</p>
           <h3>Image Needs:</h3>
           <ul>
-            {websiteAnalysis.imageNeeds.map((need, index) => (
+            {websiteAnalysis.imageNeeds.map((need: string, index: number) => (
               <li key={index}>{need}</li>
             ))}
           </ul>
           <h3>Color Palette:</h3>
           <div className="flex flex-row gap-2">
-            {websiteAnalysis.colorPalette.map((color, index) => (
-              <div
-                key={index}
-                style={{
-                  backgroundColor: color,
-                  width: "20px",
-                  height: "20px",
-                }}
-              >
-                {color}
-              </div>
-            ))}
+            {websiteAnalysis.colorPalette.map(
+              (color: string, index: number) => (
+                <div
+                  key={index}
+                  style={{
+                    backgroundColor: color,
+                    width: "20px",
+                    height: "20px",
+                  }}
+                >
+                  {color}
+                </div>
+              )
+            )}
           </div>
           <h3>Style Recommendations:</h3>
           <p>{websiteAnalysis.styleRecommendations}</p>

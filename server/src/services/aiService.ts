@@ -1,5 +1,5 @@
 import Replicate from "replicate";
-import { WebsiteAnalysis, GeneratedImage } from "../types";
+import { WebsiteAnalysis, GeneratedImage } from "@framer-plugin/shared";
 import { writeFile } from "node:fs/promises";
 
 // Initialize Replicate

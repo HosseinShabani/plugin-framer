@@ -1,8 +1,8 @@
 // Load environment variables
-require("dotenv").config();
-
+import "dotenv/config";
 import express from "express";
 import cors from "cors";
+import { createSuccessResponse } from "@framer-plugin/shared";
 import { analyzeRoutes } from "./routes/analyze";
 import { imageRoutes } from "./routes/image";
 
@@ -21,7 +21,7 @@ app.use("/api/generate", imageRoutes);
 
 // Health check route
 app.get("/health", (req, res) => {
-  res.status(200).json({ status: "ok" });
+  res.status(200).json(createSuccessResponse({ status: "ok" }));
 });
 
 // Start server
