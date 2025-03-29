@@ -1,7 +1,7 @@
 import { framer, CanvasNode, PublishInfo } from "framer-plugin";
 import { useState, useEffect } from "react";
 import "./App.css";
-
+import { WebsiteAnalysis } from "../../server/src/schemas";
 framer.showUI({
   position: "top right",
   width: 240,
@@ -88,14 +88,14 @@ function usePublishInfo() {
 
   return publishInfo;
 }
+
 export function App() {
   const selection = useSelection();
   const layer = selection.length === 1 ? "layer" : "layers";
   const publishInfo = usePublishInfo();
   // State to store all texts
   const [allTexts, setAllTexts] = useState<string[]>([]);
-
-
+  const [websiteAnalysis, setWebsiteAnalysis] = useState<WebsiteAnalysis>();
   // framer
   //   .getNodesWithType("TextNode")
   //   .then((res) => {
@@ -133,7 +133,61 @@ export function App() {
   const getAllTexts = async () => {
     const texts = await findAllTexts();
     setAllTexts(texts);
-    console.log(texts);
+    const analyzeRes = await fetch("http://localhost:3000/api/analyze", {
+      method: "POST",
+      body: JSON.stringify({ texts }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    const { data: analyzeData } = await analyzeRes.json();
+
+    setWebsiteAnalysis(analyzeData);
+
+    const generateRes = await fetch("http://localhost:3000/api/generate", {
+      method: "POST",
+      body: JSON.stringify({ websiteAnalysis: analyzeData, imageCount: 3 }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    const generateData = await generateRes.json();
+    console.log(generateData);
+
+    // const data = {
+    //   theme:
+    //     "Italian Handmade Designer Furniture, Specifically High-End Chairs",
+    //   type: "E-commerce Portfolio",
+    //   purpose:
+    //     "Showcase and sell premium, handcrafted Italian chairs and furniture with an emphasis on traditional craftsmanship and modern design",
+    //   targetAudience:
+    //     "Affluent design enthusiasts, interior designers, luxury home furnishing consumers, aged 30-55, with high disposable income and appreciation for artisanal craftsmanship",
+    //   imageNeeds: [
+    //     "Close-up shots of chair craftsmanship details",
+    //     "Professional lifestyle images of chairs in sophisticated interior settings",
+    //     "Behind-the-scenes images of artisans creating furniture in Tuscany",
+    //     "Minimalist product photography with clean backgrounds",
+    //     "Contextual images showing chairs in various design environments",
+    //     "Artistic composition images highlighting chair design nuances",
+    //     "Interactive images demonstrating chair functionality and comfort",
+    //   ],
+    //   colorPalette: ["#F5F5F5", "#2C3E50", "#D3D3D3", "#8B4513", "#FFFFFF"],
+    //   styleRecommendations:
+    //     "Minimalist, elegant, with strong emphasis on clean lines, subtle textures, and highlighting craftsmanship through high-quality, well-lit photography that communicates luxury and precision",
+    // };
+
+    // fetch("http://localhost:3000/api/generate", {
+    //   method: "POST",
+    //   body: JSON.stringify({ websiteAnalysis: data, imageCount: 2 }),
+    //   headers: {
+    //     "Content-Type": "application/json",
+    //   },
+    // })
+    //   .then((res) => res.json())
+    //   .then((res) => {
+    //     console.log(res);
+    //   });
+    // console.log(texts);
   };
 
   // framer.getCanvasRoot().then((res) => {
@@ -182,6 +236,41 @@ export function App() {
               <li key={index}>{text}</li>
             ))}
           </ul>
+        </div>
+      )}
+      {websiteAnalysis && (
+        <div>
+          <h3>Website Theme:</h3>
+          <p>{websiteAnalysis.theme}</p>
+          <h3>Website Type:</h3>
+          <p>{websiteAnalysis.type}</p>
+          <h3>Website Purpose:</h3>
+          <p>{websiteAnalysis.purpose}</p>
+          <h3>Target Audience:</h3>
+          <p>{websiteAnalysis.targetAudience}</p>
+          <h3>Image Needs:</h3>
+          <ul>
+            {websiteAnalysis.imageNeeds.map((need, index) => (
+              <li key={index}>{need}</li>
+            ))}
+          </ul>
+          <h3>Color Palette:</h3>
+          <div className="flex flex-row gap-2">
+            {websiteAnalysis.colorPalette.map((color, index) => (
+              <div
+                key={index}
+                style={{
+                  backgroundColor: color,
+                  width: "20px",
+                  height: "20px",
+                }}
+              >
+                {color}
+              </div>
+            ))}
+          </div>
+          <h3>Style Recommendations:</h3>
+          <p>{websiteAnalysis.styleRecommendations}</p>
         </div>
       )}
     </main>
