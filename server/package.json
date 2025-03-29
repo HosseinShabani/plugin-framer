@@ -7,8 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc",
     "start": "node -r module-alias/register dist/index.js",
-    "dev": "ts-node-dev --respawn --transpile-only -r tsconfig-paths/register src/index.ts --env-file .env",
-    "predev": "pnpm run build --project ../shared"
+    "dev": "ts-node-dev --respawn --transpile-only -r tsconfig-paths/register src/index.ts --env-file .env"
   },
   "keywords": [],
   "author": "",

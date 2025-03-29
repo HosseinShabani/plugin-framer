@@ -3,8 +3,7 @@
   "private": true,
   "version": "1.0.0",
   "scripts": {
-    "dev": "pnpm run dev:shared && pnpm -r --parallel dev",
-    "dev:shared": "pnpm --filter @framer-plugin/shared build",
+    "dev": "pnpm -r --parallel dev",
     "dev:client": "pnpm --filter test dev",
     "dev:server": "pnpm --filter server dev",
     "build": "pnpm run build:shared && pnpm -r --parallel build",
