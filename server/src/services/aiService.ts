@@ -1,6 +1,7 @@
 import Replicate from "replicate";
 import { WebsiteAnalysis, GeneratedImage } from "@framer-plugin/shared";
 import { writeFile } from "node:fs/promises";
+import path from "path";
 
 // Initialize Replicate
 const replicate = new Replicate({
@@ -112,15 +113,6 @@ export async function generateImages(
     const images: GeneratedImage[] = [];
 
     // Create base prompt from analysis
-    const basePrompt = `Create a professional, high-quality image that would be perfect for a ${
-      websiteAnalysis.type
-    } website about ${websiteAnalysis.theme}. 
-The website targets ${websiteAnalysis.targetAudience} and aims to ${
-      websiteAnalysis.purpose
-    }.
-Style: ${style || websiteAnalysis.styleRecommendations}
-Color palette: ${websiteAnalysis.colorPalette.join(", ")}
-${userRequests ? `Additional requirements: ${userRequests}` : ""}`;
 
     // Parse size dimensions
     const [widthStr, heightStr] = size.split("x");
@@ -129,14 +121,29 @@ ${userRequests ? `Additional requirements: ${userRequests}` : ""}`;
 
     // Generate the specified number of images
     for (let i = 0; i < count; i++) {
-      // Create a slightly varied prompt for each image
       const imageCategory =
         websiteAnalysis.imageNeeds[i % websiteAnalysis.imageNeeds.length];
-      const prompt = `${basePrompt}\nThis specific image should be: ${imageCategory}`;
+      // const prompt = `${basePrompt}\n Please consider the following categories: ${websiteAnalysis.imageNeeds.join(
+      //   ", "
+      // )}`;
+
+      const prompt = `Create a professional, high-quality image that would be perfect for a ${
+        websiteAnalysis.type
+      } website about ${websiteAnalysis.theme}. 
+  The website targets ${websiteAnalysis.targetAudience} and aims to ${
+        websiteAnalysis.purpose
+      }.
+      **Please consider the following: ${imageCategory}**
+        
+  Style: ${style || websiteAnalysis.styleRecommendations}
+  Color palette: ${websiteAnalysis.colorPalette.join(", ")}
+  ${userRequests ? `Additional requirements: ${userRequests}` : ""}
+  
+  *Negative prompt: low quality, blurry, distorted, deformed, ugly, bad anatomy, watermark, text, signature, logo`;
 
       // Add negative prompt for better quality
-      const negativePrompt =
-        "low quality, blurry, distorted, deformed, ugly, bad anatomy, watermark, text, signature, logo";
+      // const negativePrompt =
+      //   "low quality, blurry, distorted, deformed, ugly, bad anatomy, watermark, text, signature, logo";
 
       // Call the Replicate API for image generation
       const output: ReplicateResponse = await replicate.run(
@@ -144,49 +151,27 @@ ${userRequests ? `Additional requirements: ${userRequests}` : ""}`;
         {
           input: {
             prompt,
-            // width,
-            // height,
-            num_outputs: 2,
+            num_outputs: 1,
             aspect_ratio: `1:1`,
             output_format: "png",
             guidance_scale: 7.5,
-            negative_prompt: negativePrompt,
+            // negative_prompt: negativePrompt,
           },
         }
       );
 
-      console.log(output);
-
+      // Save each generated image and create its URL
       for (const [index, item] of Object.entries(output)) {
-        await writeFile(`output_new_${index}_${i}.png`, item as string);
-      }
+        const filename = `image_${Date.now()}_${i}_${index}.png`;
+        const filePath = path.join(__dirname, "../../public/images", filename);
+        await writeFile(filePath, item as string);
 
-      // Add the generated image to the results
-      // if (Array.isArray(output) && output.length > 0) {
-      //   images.push({
-      //     url: output[0],
-      //     prompt,
-      //   });
-      // } else if (output && typeof output === "object") {
-      //   // Handle models that return an object with 'images' array
-      //   const outputObj = output as ReplicateImageOutput;
-      //   if (
-      //     outputObj.images &&
-      //     Array.isArray(outputObj.images) &&
-      //     outputObj.images.length > 0
-      //   ) {
-      //     images.push({
-      //       url: outputObj.images[0],
-      //       prompt,
-      //     });
-      //   }
-      // } else if (typeof output === "string") {
-      //   // Handle models that return a single URL
-      //   images.push({
-      //     url: output,
-      //     prompt,
-      //   });
-      // }
+        // Add the generated image to the results with its public URL
+        images.push({
+          url: `/images/${filename}`,
+          prompt,
+        });
+      }
     }
 
     return images;

@@ -1,8 +1,7 @@
 {
   "id": "9899cd",
-  "name": "Test",
-  "modes": [
-    "canvas"
-  ],
+  "name": "AI Image Generator",
+  "description": "Generate on-brand AI images for your website based on contextual analysis",
+  "modes": ["canvas"],
   "icon": "/icon.svg"
 }

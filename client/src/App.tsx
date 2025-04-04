@@ -1,282 +1,275 @@
-import { framer, CanvasNode } from "framer-plugin";
+import { framer } from "framer-plugin";
 import { useState, useEffect } from "react";
-import { WebsiteAnalysis } from "@framer-plugin/shared";
-
+import { WebsiteAnalysis, GeneratedImage } from "@framer-plugin/shared";
+import { Button } from "./components/Button";
+import { Analysis } from "./components/Analysis";
+import { ImageGenerator } from "./components/ImageGenerator";
+import { ImageGallery } from "./components/ImageGallery";
+import { analyzeWebsiteText } from "./services/apiService";
+import {
+  getAnalysis,
+  saveAnalysis,
+  getGeneratedImages,
+  saveGeneratedImages,
+} from "./utils/storage";
 import "./App.css";
 
+// Set up plugin UI
 framer.showUI({
   position: "top right",
-  width: 240,
-  height: 695,
+  width: 300,
+  height: 700,
 });
 
-function useSelection() {
-  const [selection, setSelection] = useState<CanvasNode[]>([]);
+/**
+ * Custom hook to manage plugin storage
+ */
+function usePluginStorage<T>(
+  key: string,
+  initialData: T | null = null
+): [T | null, (data: T) => void] {
+  const [data, setData] = useState<T | null>(initialData);
 
+  // Load data from storage on mount
   useEffect(() => {
-    return framer.subscribeToSelection(setSelection);
-  }, []);
+    if (key === "analysis") {
+      const savedAnalysis = getAnalysis();
+      if (savedAnalysis) setData(savedAnalysis as T);
+    } else if (key === "images") {
+      const savedImages = getGeneratedImages();
+      if (savedImages.length > 0) setData(savedImages as T);
+    }
+  }, [key]);
 
-  return selection;
+  // Save data to storage when it changes
+  const saveData = (newData: T) => {
+    if (key === "analysis") {
+      saveAnalysis(newData as WebsiteAnalysis);
+    } else if (key === "images") {
+      saveGeneratedImages(newData as GeneratedImage[]);
+    }
+    setData(newData);
+  };
+
+  return [data, saveData];
 }
 
-// Function to recursively find all text nodes from a starting node
-// async function getAllTexts(nodes: CanvasNode[]): Promise<string[]> {
-//   const texts: string[] = [];
-
-//   for (const node of nodes) {
-//     // console.log(node);
-
-//     // If the current node is a text node with content, add its text
-//     if (node.__class === "TextNode" && node.name) {
-//       texts.push(node.name);
-//     }
-
-//     // Get children of the current node
-//     const children = await node.getChildren();
-//     // console.log(node?.name);
-//     // // Recursively process all children
-//     const childTexts = await getAllTexts(children);
-//     if (childTexts.length) {
-//       console.log(node.name);
-//       console.log(childTexts);
-//     }
-
-//     // texts.push(...childTexts);
-//   }
-
-//   return texts;
-// }
-
-const findAllTexts = async () => {
+/**
+ * Find all text content in the Framer project
+ */
+const findAllTexts = async (): Promise<string[]> => {
   try {
-    const letters = new Set();
+    const textSet = new Set<string>();
 
+    // Get all text nodes
     const textNodes = await framer.getNodesWithType("TextNode");
     textNodes.forEach((item) => {
-      letters.add(item.name);
+      if (item.name && item.name.trim()) {
+        textSet.add(item.name);
+      }
     });
 
+    // Get content from collections
     const collections = await framer.getCollections();
-
     for (const col of collections) {
-      const items = await col.getItems(); // Wait for items to be retrieved
-
+      const items = await col.getItems();
       for (const item of items) {
         for (const key of Object.keys(item.fieldData)) {
           const field = item.fieldData[key];
-          if (field.type === "string") {
-            letters.add(field.value);
-            // console.log(field.value);
+          if (field.type === "string" && field.value && field.value.trim()) {
+            textSet.add(field.value);
           }
         }
       }
     }
 
-    return Array.from(letters) as string[];
+    return Array.from(textSet);
   } catch (error) {
-    console.log(111, error);
+    console.error("Error finding texts:", error);
+    return [];
   }
-
-  return [];
 };
 
-// function usePublishInfo() {
-//   const [publishInfo, setPublishInfo] = useState<PublishInfo>();
-
-//   useEffect(() => {
-//     return framer.subscribeToPublishInfo(setPublishInfo);
-//   }, []);
-
-//   return publishInfo;
-// }
-
 export function App() {
-  const selection = useSelection();
-  const layer = selection.length === 1 ? "layer" : "layers";
-  // const publishInfo = usePublishInfo();
-  // State to store all texts
+  // State for text content and analysis
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [allTexts, setAllTexts] = useState<string[]>([]);
-  const [websiteAnalysis, setWebsiteAnalysis] = useState<WebsiteAnalysis>();
-  // framer
-  //   .getNodesWithType("TextNode")
-  //   .then((res) => {
-  //     console.log(res);
-  //   })
-  //   .catch((e) => {
-  //     console.log(e);
-  //   });
+  const [showTexts, setShowTexts] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  // Function to fetch and display all texts from selected nodes
-  // const handleGetAllTexts = async () => {
-  //   try {
-  //     if (selection.length === 0) {
-  //       console.log("No nodes selected. Please select some layers.");
-  //       setAllTexts(["No nodes selected. Please select some layers."]);
-  //       return;
-  //     }
+  // Stored data
+  const [websiteAnalysis, setWebsiteAnalysis] =
+    usePluginStorage<WebsiteAnalysis>("analysis");
+  const [generatedImages, setGeneratedImages] = usePluginStorage<
+    GeneratedImage[]
+  >("images", []);
 
-  //     const texts = await getAllTexts(selection);
-  //     setAllTexts(texts);
-  //     console.log("All texts in selected nodes:", texts);
-  //   } catch (error) {
-  //     console.error("Error fetching texts:", error);
-  //     setAllTexts(["Error fetching texts. Check console for details."]);
-  //   }
-  // };
-  // console.log(framer.getNode('qIsOzmKNV'));
-  // framer.getNode(selection[0]?.id).then((res) => {
-  //   console.log(res); res?.getChildren().then((res) => {
-  //     console.log(res);
-  //   }
-  //   )
-  // });
+  // UI State
+  const [activeTab, setActiveTab] = useState<"analysis" | "generator">(
+    websiteAnalysis ? "generator" : "analysis"
+  );
 
-  const getAllTexts = async () => {
-    const texts = await findAllTexts();
-    setAllTexts(texts);
-    const analyzeRes = await fetch("http://localhost:3000/api/analyze", {
-      method: "POST",
-      body: JSON.stringify({ texts }),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    const { data: analyzeData } = await analyzeRes.json();
+  /**
+   * Analyze the website content
+   */
+  const handleAnalyzeWebsite = async () => {
+    setIsAnalyzing(true);
+    setError(null);
 
-    setWebsiteAnalysis(analyzeData);
+    try {
+      // Collect all text content
+      const texts = await findAllTexts();
+      setAllTexts(texts);
 
-    const generateRes = await fetch("http://localhost:3000/api/generate", {
-      method: "POST",
-      body: JSON.stringify({ websiteAnalysis: analyzeData, imageCount: 3 }),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    const generateData = await generateRes.json();
-    console.log(generateData);
+      if (texts.length === 0) {
+        setError(
+          "No text content found in your project. Please add some text first."
+        );
+        setIsAnalyzing(false);
+        return;
+      }
 
-    // const data = {
-    //   theme:
-    //     "Italian Handmade Designer Furniture, Specifically High-End Chairs",
-    //   type: "E-commerce Portfolio",
-    //   purpose:
-    //     "Showcase and sell premium, handcrafted Italian chairs and furniture with an emphasis on traditional craftsmanship and modern design",
-    //   targetAudience:
-    //     "Affluent design enthusiasts, interior designers, luxury home furnishing consumers, aged 30-55, with high disposable income and appreciation for artisanal craftsmanship",
-    //   imageNeeds: [
-    //     "Close-up shots of chair craftsmanship details",
-    //     "Professional lifestyle images of chairs in sophisticated interior settings",
-    //     "Behind-the-scenes images of artisans creating furniture in Tuscany",
-    //     "Minimalist product photography with clean backgrounds",
-    //     "Contextual images showing chairs in various design environments",
-    //     "Artistic composition images highlighting chair design nuances",
-    //     "Interactive images demonstrating chair functionality and comfort",
-    //   ],
-    //   colorPalette: ["#F5F5F5", "#2C3E50", "#D3D3D3", "#8B4513", "#FFFFFF"],
-    //   styleRecommendations:
-    //     "Minimalist, elegant, with strong emphasis on clean lines, subtle textures, and highlighting craftsmanship through high-quality, well-lit photography that communicates luxury and precision",
-    // };
+      // Send texts to the backend for analysis
+      const analysis = await analyzeWebsiteText(texts);
 
-    // fetch("http://localhost:3000/api/generate", {
-    //   method: "POST",
-    //   body: JSON.stringify({ websiteAnalysis: data, imageCount: 2 }),
-    //   headers: {
-    //     "Content-Type": "application/json",
-    //   },
-    // })
-    //   .then((res) => res.json())
-    //   .then((res) => {
-    //     console.log(res);
-    //   });
-    // console.log(texts);
+      // Save the analysis result
+      setWebsiteAnalysis(analysis);
+
+      // Switch to the generator tab
+      setActiveTab("generator");
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Failed to analyze website"
+      );
+    } finally {
+      setIsAnalyzing(false);
+    }
   };
 
-  // framer.getCanvasRoot().then((res) => {
-  //   console.log(res);
-  // });
-  // framer.getRect(selection[0]?.id).then((res) => {
-  //   console.log(res);
-  // });
+  /**
+   * Handle image generation
+   */
+  const handleImagesGenerated = (images: GeneratedImage[]) => {
+    setGeneratedImages(images);
+  };
 
-  // framer.getText().then((texts) => {
-  //   console.log("Selected text elements:", texts);
-  // });
-  // console.log(selection);
-  // framer.getChildren('qIsOzmKNV').then((res) => {
-  //   console.log(res);
-  // });
-  // qIsOzmKNV
   return (
-    <main>
-      <p>
-        Welcome! Check out the{" "}
-        <a
-          href="https://framer.com/developers/plugins/introduction"
-          target="_blank"
-        >
-          Docs
-        </a>{" "}
-        to start. You have {selection.length} {layer} selected.
-      </p>
+    <main className="p-4 flex flex-col h-full">
+      <header className="mb-4">
+        <h1 className="text-lg font-bold mb-1">AI Image Generator</h1>
+        <p className="text-sm text-gray-600">
+          Generate on-brand images for your Framer website based on AI analysis
+        </p>
+      </header>
 
-      {/* Button to trigger text collection */}
-      {/* <button className="framer-button-primary" onClick={handleGetAllTexts}>
-        Get All Texts
-      </button> */}
-      {/* <button className="framer-button-primary" onClick={name}> */}
-      <button className="framer-button-primary" onClick={getAllTexts}>
-        Get All Texts
-      </button>
-
-      {/* Display collected texts */}
-      {allTexts.length > 0 && (
-        <div>
-          <h3>All Texts ({allTexts.length}):</h3>
-          <ul>
-            {allTexts.map((text, index) => (
-              <li key={index}>{text}</li>
-            ))}
-          </ul>
+      {error && (
+        <div className="mb-4 p-3 bg-red-50 border border-red-100 rounded text-red-700 text-sm">
+          {error}
         </div>
       )}
-      {websiteAnalysis && (
-        <div>
-          <h3>Website Theme:</h3>
-          <p>{websiteAnalysis.theme}</p>
-          <h3>Website Type:</h3>
-          <p>{websiteAnalysis.type}</p>
-          <h3>Website Purpose:</h3>
-          <p>{websiteAnalysis.purpose}</p>
-          <h3>Target Audience:</h3>
-          <p>{websiteAnalysis.targetAudience}</p>
-          <h3>Image Needs:</h3>
-          <ul>
-            {websiteAnalysis.imageNeeds.map((need: string, index: number) => (
-              <li key={index}>{need}</li>
-            ))}
-          </ul>
-          <h3>Color Palette:</h3>
-          <div className="flex flex-row gap-2">
-            {websiteAnalysis.colorPalette.map(
-              (color: string, index: number) => (
-                <div
-                  key={index}
-                  style={{
-                    backgroundColor: color,
-                    width: "20px",
-                    height: "20px",
-                  }}
-                >
-                  {color}
+
+      {!websiteAnalysis ? (
+        // Initial analysis state
+        <div className="space-y-4">
+          <p className="text-sm">
+            Click the button below to analyze your website content and generate
+            relevant images.
+          </p>
+
+          <Button
+            variant="primary"
+            onClick={handleAnalyzeWebsite}
+            isLoading={isAnalyzing}
+            fullWidth
+          >
+            {isAnalyzing ? "Analyzing..." : "Analyze Website Content"}
+          </Button>
+
+          {allTexts.length > 0 && (
+            <div>
+              <button
+                className="text-xs text-gray-500 underline"
+                onClick={() => setShowTexts(!showTexts)}
+              >
+                {showTexts ? "Hide detected text" : "Show detected text"}
+              </button>
+
+              {showTexts && (
+                <div className="mt-2 border rounded p-2 max-h-48 overflow-y-auto">
+                  <div className="text-xs font-medium mb-1">
+                    Detected Text ({allTexts.length})
+                  </div>
+                  <ul className="text-xs space-y-1">
+                    {allTexts.map((text, i) => (
+                      <li key={i} className="truncate">
+                        {text}
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-              )
-            )}
+              )}
+            </div>
+          )}
+        </div>
+      ) : (
+        // Analysis completed - show tabs and content
+        <div className="flex-1 flex flex-col">
+          <div className="flex border-b gap-2 mb-4">
+            <button
+              className={`px-4 py-2 flex-1 text-sm font-medium border-b-2 ${
+                activeTab === "analysis"
+                  ? "border-blue-500 text-blue-600"
+                  : "border-transparent text-gray-500 hover:text-gray-700"
+              }`}
+              onClick={() => setActiveTab("analysis")}
+            >
+              Analysis
+            </button>
+            <button
+              className={`px-4 py-2 flex-1 text-sm font-medium border-b-2 ${
+                activeTab === "generator"
+                  ? "border-blue-500 text-blue-600"
+                  : "border-transparent text-gray-500 hover:text-gray-700"
+              }`}
+              onClick={() => setActiveTab("generator")}
+            >
+              Generator
+            </button>
           </div>
-          <h3>Style Recommendations:</h3>
-          <p>{websiteAnalysis.styleRecommendations}</p>
+
+          {activeTab === "analysis" ? (
+            // Website analysis tab
+            <div className="overflow-y-auto flex-1">
+              <Analysis analysis={websiteAnalysis} />
+
+              <div className="mt-4 flex justify-center">
+                <Button
+                  variant="secondary"
+                  onClick={handleAnalyzeWebsite}
+                  isLoading={isAnalyzing}
+                  className="text-sm"
+                >
+                  {isAnalyzing ? "Analyzing..." : "Re-analyze Content"}
+                </Button>
+              </div>
+            </div>
+          ) : (
+            // Image generator tab
+            <div className="overflow-y-auto flex-1">
+              <ImageGenerator
+                websiteAnalysis={websiteAnalysis}
+                onImagesGenerated={handleImagesGenerated}
+              />
+
+              <ImageGallery images={generatedImages || []} />
+            </div>
+          )}
         </div>
       )}
+
+      <footer className="mt-4 pt-3 border-t text-xs text-center text-gray-500">
+        Powered by AI • © {new Date().getFullYear()}
+      </footer>
     </main>
   );
 }
