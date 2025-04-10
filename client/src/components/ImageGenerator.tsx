@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { WebsiteAnalysis, GeneratedImage } from "@framer-plugin/shared";
-import { Button } from "./Button";
-import { Card } from "./Card";
+import { Card, Button } from "./ui";
 import { generateImages } from "../services/apiService";
 import { saveGeneratedImages } from "../utils/storage";
+import { IMAGE_COUNT } from "../constants/image-count";
 
 interface ImageGeneratorProps {
   websiteAnalysis: WebsiteAnalysis;
@@ -15,7 +15,7 @@ export const ImageGenerator: React.FC<ImageGeneratorProps> = ({
   onImagesGenerated,
 }) => {
   const [userRequests, setUserRequests] = useState("");
-  const [imageCount, setImageCount] = useState(4);
+  const [imageCount, setImageCount] = useState(IMAGE_COUNT[3]);
   const [imageStyle, setImageStyle] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -25,12 +25,7 @@ export const ImageGenerator: React.FC<ImageGeneratorProps> = ({
     setError(null);
 
     try {
-      const images = await generateImages(
-        websiteAnalysis,
-        userRequests,
-        imageCount,
-        imageStyle
-      );
+      const images = await generateImages(websiteAnalysis, userRequests, imageCount, imageStyle);
 
       // Save images to local storage
       saveGeneratedImages(images);
@@ -40,9 +35,7 @@ export const ImageGenerator: React.FC<ImageGeneratorProps> = ({
         onImagesGenerated(images);
       }
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to generate images"
-      );
+      setError(err instanceof Error ? err.message : "Failed to generate images");
     } finally {
       setIsGenerating(false);
     }
@@ -52,38 +45,34 @@ export const ImageGenerator: React.FC<ImageGeneratorProps> = ({
     <Card title="Generate Images" className="mb-4">
       <div className="space-y-3">
         <div>
-          <label
-            htmlFor="imageCount"
-            className="block text-xs font-medium mb-1"
-          >
+          <label htmlFor="imageCount" className="mb-1 block text-xs font-medium">
             Number of Images
           </label>
           <select
             id="imageCount"
-            className="w-full text-sm rounded border border-gray-300 px-2 py-1"
+            className="bg-framer-bg w-full rounded border border-gray-300 px-2 py-1 text-sm"
             value={imageCount}
             onChange={(e) => setImageCount(Number(e.target.value))}
             disabled={isGenerating}
           >
-            <option value="1">1 Image</option>
-            <option value="2">2 Images</option>
-            <option value="3">3 Images</option>
-            <option value="4">4 Images</option>
-            <option value="6">6 Images</option>
+            {IMAGE_COUNT.map((count) => {
+              return (
+                <option key={count} value={count}>
+                  {count} Image
+                </option>
+              );
+            })}
           </select>
         </div>
 
         <div>
-          <label
-            htmlFor="imageStyle"
-            className="block text-xs font-medium mb-1"
-          >
+          <label htmlFor="imageStyle" className="mb-1 block text-xs font-medium">
             Style (Optional)
           </label>
           <input
             id="imageStyle"
             type="text"
-            className="w-full text-sm rounded border border-gray-300 px-2 py-1"
+            className="w-full rounded border border-gray-300 px-2 py-1 text-sm"
             placeholder="e.g., Minimalist, Vibrant, Corporate..."
             value={imageStyle}
             onChange={(e) => setImageStyle(e.target.value)}
@@ -92,15 +81,12 @@ export const ImageGenerator: React.FC<ImageGeneratorProps> = ({
         </div>
 
         <div>
-          <label
-            htmlFor="userRequests"
-            className="block text-xs font-medium mb-1"
-          >
+          <label htmlFor="userRequests" className="mb-1 block text-xs font-medium">
             Additional Requirements (Optional)
           </label>
           <textarea
             id="userRequests"
-            className="w-full text-sm rounded border border-gray-300 px-2 py-1"
+            className="w-full rounded border border-gray-300 px-2 py-1 text-sm"
             placeholder="Describe any specific requirements for the images..."
             rows={3}
             value={userRequests}
@@ -110,17 +96,12 @@ export const ImageGenerator: React.FC<ImageGeneratorProps> = ({
         </div>
 
         {error && (
-          <div className="text-red-500 text-xs p-2 bg-red-50 rounded border border-red-100">
+          <div className="rounded border border-red-100 bg-red-50 p-2 text-xs text-red-500">
             {error}
           </div>
         )}
 
-        <Button
-          variant="primary"
-          fullWidth
-          isLoading={isGenerating}
-          onClick={handleGenerate}
-        >
+        <Button variant="primary" fullWidth isLoading={isGenerating} onClick={handleGenerate}>
           {isGenerating ? "Generating..." : "Generate Images"}
         </Button>
       </div>

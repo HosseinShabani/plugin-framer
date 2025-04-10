@@ -1,18 +1,15 @@
 import { framer } from "framer-plugin";
 import { useState, useEffect } from "react";
 import { WebsiteAnalysis, GeneratedImage } from "@framer-plugin/shared";
-import { Button } from "./components/Button";
-import { Analysis } from "./components/Analysis";
 import { ImageGenerator } from "./components/ImageGenerator";
 import { ImageGallery } from "./components/ImageGallery";
+import AnalysisTab from "./components/tabs/AnalysisTab";
+import { ANALYSIS_KEY, IMAGE_KEY, TEXT_KEY } from "./constants/storage-keys";
 import { analyzeWebsiteText } from "./services/apiService";
-import {
-  getAnalysis,
-  saveAnalysis,
-  getGeneratedImages,
-  saveGeneratedImages,
-} from "./utils/storage";
-import "./App.css";
+import { Button, LoadingSpinner } from "./components/ui";
+import { TAB_ITEMS } from "./constants/tabs";
+import TextList from "./components/TextList";
+import { usePluginStorage } from "./hooks";
 
 // Set up plugin UI
 framer.showUI({
@@ -21,38 +18,11 @@ framer.showUI({
   height: 700,
 });
 
-/**
- * Custom hook to manage plugin storage
- */
-function usePluginStorage<T>(
-  key: string,
-  initialData: T | null = null
-): [T | null, (data: T) => void] {
-  const [data, setData] = useState<T | null>(initialData);
-
-  // Load data from storage on mount
-  useEffect(() => {
-    if (key === "analysis") {
-      const savedAnalysis = getAnalysis();
-      if (savedAnalysis) setData(savedAnalysis as T);
-    } else if (key === "images") {
-      const savedImages = getGeneratedImages();
-      if (savedImages.length > 0) setData(savedImages as T);
-    }
-  }, [key]);
-
-  // Save data to storage when it changes
-  const saveData = (newData: T) => {
-    if (key === "analysis") {
-      saveAnalysis(newData as WebsiteAnalysis);
-    } else if (key === "images") {
-      saveGeneratedImages(newData as GeneratedImage[]);
-    }
-    setData(newData);
-  };
-
-  return [data, saveData];
-}
+const getProjectInfo = async () => {
+  return framer.getProjectInfo().then((res) => {
+    return res.name + " " + res.id;
+  });
+};
 
 /**
  * Find all text content in the Framer project
@@ -91,29 +61,39 @@ const findAllTexts = async (): Promise<string[]> => {
 };
 
 export function App() {
-  // State for text content and analysis
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [allTexts, setAllTexts] = useState<string[]>([]);
-  const [showTexts, setShowTexts] = useState(false);
+  const [name, setName] = useState<string | null>(null);
+  useEffect(() => {
+    getProjectInfo().then((res) => {
+      setName(res);
+    });
+  }, []);
+
+  if (!name) {
+    return <LoadingSpinner />;
+  }
+
+  return <AI projectName={name} />;
+}
+
+const AI = ({ projectName }: { projectName: string }) => {
+  // UI State
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState(TAB_ITEMS[0].id);
 
   // Stored data
-  const [websiteAnalysis, setWebsiteAnalysis] =
-    usePluginStorage<WebsiteAnalysis>("analysis");
-  const [generatedImages, setGeneratedImages] = usePluginStorage<
-    GeneratedImage[]
-  >("images", []);
-
-  // UI State
-  const [activeTab, setActiveTab] = useState<"analysis" | "generator">(
-    websiteAnalysis ? "generator" : "analysis"
+  const [allTexts, setAllTexts] = usePluginStorage<string[]>(`${projectName}-${TEXT_KEY}`, []);
+  const [analysis, setAnalysis] = usePluginStorage<WebsiteAnalysis | null>(
+    `${projectName}-${ANALYSIS_KEY}`,
+    null
+  );
+  const [generatedImages, setGeneratedImages] = usePluginStorage<GeneratedImage[]>(
+    `${projectName}-${IMAGE_KEY}`,
+    []
   );
 
-  /**
-   * Analyze the website content
-   */
   const handleAnalyzeWebsite = async () => {
-    setIsAnalyzing(true);
+    setLoading(true);
     setError(null);
 
     try {
@@ -122,154 +102,109 @@ export function App() {
       setAllTexts(texts);
 
       if (texts.length === 0) {
-        setError(
-          "No text content found in your project. Please add some text first."
-        );
-        setIsAnalyzing(false);
+        setError("No text content found in your project. Please add some text first.");
+        setLoading(false);
         return;
       }
 
       // Send texts to the backend for analysis
-      const analysis = await analyzeWebsiteText(texts);
+      let analysis = await analyzeWebsiteText(texts);
+
+      if (Array.isArray(analysis?.targetAudience)) {
+        analysis = {
+          ...analysis,
+          targetAudience: analysis?.targetAudience.join(", "),
+        };
+      }
 
       // Save the analysis result
-      setWebsiteAnalysis(analysis);
+      setAnalysis(analysis);
 
       // Switch to the generator tab
-      setActiveTab("generator");
+      setActiveTab(2);
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to analyze website"
-      );
+      setError(err instanceof Error ? err.message : "Failed to analyze website");
     } finally {
-      setIsAnalyzing(false);
+      setLoading(false);
     }
   };
 
-  /**
-   * Handle image generation
-   */
   const handleImagesGenerated = (images: GeneratedImage[]) => {
     setGeneratedImages(images);
   };
 
   return (
-    <main className="p-4 flex flex-col h-full">
+    <main className="flex h-full flex-col p-4">
       <header className="mb-4">
-        <h1 className="text-lg font-bold mb-1">AI Image Generator</h1>
-        <p className="text-sm text-gray-600">
+        <h1 className="divider mb-1 text-lg font-bold">AI Image Generator</h1>
+        <p className="text-framer-text-tertiary text-sm">
           Generate on-brand images for your Framer website based on AI analysis
         </p>
       </header>
 
       {error && (
-        <div className="mb-4 p-3 bg-red-50 border border-red-100 rounded text-red-700 text-sm">
+        <div className="mb-4 rounded border border-red-100 bg-red-50 p-3 text-sm text-red-700">
           {error}
         </div>
       )}
 
-      {!websiteAnalysis ? (
-        // Initial analysis state
-        <div className="space-y-4">
-          <p className="text-sm">
-            Click the button below to analyze your website content and generate
-            relevant images.
-          </p>
+      <>
+        <TextList texts={allTexts} />
+        {!analysis ? (
+          // Initial state
+          <div className="space-y-4">
+            <p className="text-sm">
+              Click the button below to analyze your website content and generate relevant images.
+            </p>
 
-          <Button
-            variant="primary"
-            onClick={handleAnalyzeWebsite}
-            isLoading={isAnalyzing}
-            fullWidth
-          >
-            {isAnalyzing ? "Analyzing..." : "Analyze Website Content"}
-          </Button>
-
-          {allTexts.length > 0 && (
-            <div>
-              <button
-                className="text-xs text-gray-500 underline"
-                onClick={() => setShowTexts(!showTexts)}
-              >
-                {showTexts ? "Hide detected text" : "Show detected text"}
-              </button>
-
-              {showTexts && (
-                <div className="mt-2 border rounded p-2 max-h-48 overflow-y-auto">
-                  <div className="text-xs font-medium mb-1">
-                    Detected Text ({allTexts.length})
-                  </div>
-                  <ul className="text-xs space-y-1">
-                    {allTexts.map((text, i) => (
-                      <li key={i} className="truncate">
-                        {text}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-      ) : (
-        // Analysis completed - show tabs and content
-        <div className="flex-1 flex flex-col">
-          <div className="flex border-b gap-2 mb-4">
-            <button
-              className={`px-4 py-2 flex-1 text-sm font-medium border-b-2 ${
-                activeTab === "analysis"
-                  ? "border-blue-500 text-blue-600"
-                  : "border-transparent text-gray-500 hover:text-gray-700"
-              }`}
-              onClick={() => setActiveTab("analysis")}
-            >
-              Analysis
-            </button>
-            <button
-              className={`px-4 py-2 flex-1 text-sm font-medium border-b-2 ${
-                activeTab === "generator"
-                  ? "border-blue-500 text-blue-600"
-                  : "border-transparent text-gray-500 hover:text-gray-700"
-              }`}
-              onClick={() => setActiveTab("generator")}
-            >
-              Generator
-            </button>
+            <Button variant="primary" onClick={handleAnalyzeWebsite} isLoading={loading} fullWidth>
+              {loading ? "Analyzing..." : "Analyze Website Content"}
+            </Button>
           </div>
-
-          {activeTab === "analysis" ? (
-            // Website analysis tab
-            <div className="overflow-y-auto flex-1">
-              <Analysis analysis={websiteAnalysis} />
-
-              <div className="mt-4 flex justify-center">
-                <Button
-                  variant="secondary"
-                  onClick={handleAnalyzeWebsite}
-                  isLoading={isAnalyzing}
-                  className="text-sm"
-                >
-                  {isAnalyzing ? "Analyzing..." : "Re-analyze Content"}
-                </Button>
-              </div>
+        ) : (
+          <div className="flex w-full flex-1 flex-col">
+            <div className="mb-4 flex gap-2 border-b">
+              {TAB_ITEMS.map((tab) => {
+                return (
+                  <button
+                    key={tab.id}
+                    className={`flex-1 cursor-pointer border-b-2 px-4 py-2 text-sm font-medium ${
+                      activeTab === tab.id
+                        ? "border-blue-500 text-blue-600"
+                        : "border-transparent text-gray-500 hover:text-gray-700"
+                    }`}
+                    onClick={() => setActiveTab(tab.id)}
+                  >
+                    {tab.title}
+                  </button>
+                );
+              })}
             </div>
-          ) : (
-            // Image generator tab
-            <div className="overflow-y-auto flex-1">
-              <ImageGenerator
-                websiteAnalysis={websiteAnalysis}
-                onImagesGenerated={handleImagesGenerated}
+
+            {activeTab === 1 ? (
+              <AnalysisTab
+                analysis={analysis}
+                loading={loading}
+                handleAnalyzeWebsite={handleAnalyzeWebsite}
               />
+            ) : (
+              // Image generator tab
+              <div className="flex-1 overflow-y-auto">
+                <ImageGenerator
+                  websiteAnalysis={analysis}
+                  onImagesGenerated={handleImagesGenerated}
+                />
 
-              <ImageGallery images={generatedImages || []} />
-            </div>
-          )}
-        </div>
-      )}
+                <ImageGallery images={generatedImages || []} />
+              </div>
+            )}
+          </div>
+        )}
+      </>
 
-      <footer className="mt-4 pt-3 border-t text-xs text-center text-gray-500">
+      <footer className="mt-4 w-full border-t pt-3 text-center text-xs text-gray-500">
         Powered by AI • © {new Date().getFullYear()}
       </footer>
     </main>
   );
-}
+};

@@ -1,21 +1,15 @@
 import React, { useState } from "react";
 import { framer } from "framer-plugin";
 import { GeneratedImage } from "@framer-plugin/shared";
-import { Button } from "./Button";
-import { Card } from "./Card";
+import { Card, Button } from "./ui";
 
 interface ImageGalleryProps {
   images: GeneratedImage[];
   isLoading?: boolean;
 }
 
-export const ImageGallery: React.FC<ImageGalleryProps> = ({
-  images,
-  isLoading = false,
-}) => {
-  const [selectedImage, setSelectedImage] = useState<GeneratedImage | null>(
-    null
-  );
+export const ImageGallery: React.FC<ImageGalleryProps> = ({ images, isLoading = false }) => {
+  const [selectedImage, setSelectedImage] = useState<GeneratedImage | null>(null);
   const [isInserting, setIsInserting] = useState(false);
 
   if (isLoading) {
@@ -23,10 +17,7 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({
       <Card title="Generated Images">
         <div className="grid grid-cols-2 gap-2">
           {[...Array(4)].map((_, i) => (
-            <div
-              key={i}
-              className="aspect-square bg-gray-200 animate-pulse rounded"
-            />
+            <div key={i} className="aspect-square animate-pulse rounded bg-gray-200" />
           ))}
         </div>
       </Card>
@@ -71,15 +62,14 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({
       footer={
         selectedImage && (
           <div className="flex items-center justify-between">
-            <div className="text-xs truncate max-w-[150px]">
-              <span className="font-medium">Selected:</span>{" "}
-              {selectedImage.url.split("/").pop()}
+            <div className="max-w-[150px] truncate text-xs">
+              <span className="font-medium">Selected:</span> {selectedImage.url.split("/").pop()}
             </div>
             <Button
               variant="primary"
               onClick={insertSelectedImage}
               isLoading={isInserting}
-              className="text-xs py-1"
+              className="py-1 text-xs"
             >
               Insert
             </Button>
@@ -91,22 +81,17 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({
         {images.map((image, index) => (
           <div
             key={index}
-            className={`
-              relative aspect-square cursor-pointer rounded overflow-hidden border-2
-              ${
-                selectedImage === image
-                  ? "border-blue-500"
-                  : "border-transparent"
-              }
-            `}
+            className={`relative aspect-square cursor-pointer overflow-hidden rounded border-2 ${
+              selectedImage === image ? "border-blue-500" : "border-transparent"
+            } `}
             onClick={() => handleImageClick(image)}
           >
             <img
               src={image.url}
               alt={`Generated image ${index + 1}`}
-              className="w-full h-full object-cover"
+              className="h-full w-full object-cover"
             />
-            <div className="absolute bottom-0 right-0 bg-black bg-opacity-50 text-white text-xs px-1">
+            <div className="bg-opacity-50 absolute right-0 bottom-0 bg-black px-1 text-xs text-white">
               {index + 1}
             </div>
           </div>
@@ -114,7 +99,7 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({
       </div>
 
       {selectedImage && (
-        <div className="mt-3 p-2 bg-gray-100 rounded text-xs">
+        <div className="mt-3 rounded bg-gray-100 p-2 text-xs">
           <p className="font-medium">Prompt:</p>
           <p className="mt-1 text-gray-700">{selectedImage.prompt}</p>
         </div>

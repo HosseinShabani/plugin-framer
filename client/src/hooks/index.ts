@@ -1,0 +1,1 @@
+export { usePluginStorage } from "./usePluginStorage";

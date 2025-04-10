@@ -1,6 +1,6 @@
 import React from "react";
 
-type ButtonVariant = "primary" | "secondary" | "ghost";
+type ButtonVariant = "primary" | "secondary"| "tertiary";
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant;
@@ -8,6 +8,14 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   icon?: React.ReactNode;
   fullWidth?: boolean;
 }
+
+const variantClasses: Record<ButtonVariant, string> = {
+  primary: "bg-framer-tint-dark text-framer-text-reversed ",
+  secondary: "bg-framer-tint-dimmed",
+  tertiary: "bg-framer-bg-secondary",
+};
+const baseClasses =
+  "flex items-center justify-center gap-2 text-sm px-4 py-2 rounded font-medium transition-all ";
 
 export const Button: React.FC<ButtonProps> = ({
   children,
@@ -19,20 +27,11 @@ export const Button: React.FC<ButtonProps> = ({
   className = "",
   ...props
 }) => {
-  const baseClasses =
-    "framer-button flex items-center justify-center gap-2 text-sm px-4 py-2 rounded font-medium transition-all";
-
-  const variantClasses = {
-    primary: "framer-button-primary",
-    secondary: "framer-button-secondary",
-    ghost: "framer-button-ghost",
-  };
-
   const classes = [
     baseClasses,
     variantClasses[variant],
     fullWidth ? "w-full" : "",
-    isLoading ? "opacity-70 cursor-not-allowed" : "",
+    isLoading ? "opacity-70 cursor-not-allowed" : "cursor-pointer",
     className,
   ]
     .join(" ")
@@ -41,7 +40,7 @@ export const Button: React.FC<ButtonProps> = ({
   return (
     <button className={classes} disabled={disabled || isLoading} {...props}>
       {isLoading ? (
-        <span className="inline-block w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+        <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
       ) : icon ? (
         <span className="mr-1">{icon}</span>
       ) : null}
