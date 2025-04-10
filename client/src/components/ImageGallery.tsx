@@ -5,24 +5,11 @@ import { Card, Button } from "./ui";
 
 interface ImageGalleryProps {
   images: GeneratedImage[];
-  isLoading?: boolean;
 }
 
-export const ImageGallery: React.FC<ImageGalleryProps> = ({ images, isLoading = false }) => {
+export const ImageGallery: React.FC<ImageGalleryProps> = ({ images }) => {
   const [selectedImage, setSelectedImage] = useState<GeneratedImage | null>(null);
   const [isInserting, setIsInserting] = useState(false);
-
-  if (isLoading) {
-    return (
-      <Card title="Generated Images">
-        <div className="grid grid-cols-2 gap-2">
-          {[...Array(4)].map((_, i) => (
-            <div key={i} className="aspect-square animate-pulse rounded bg-gray-200" />
-          ))}
-        </div>
-      </Card>
-    );
-  }
 
   if (images.length === 0) {
     return (

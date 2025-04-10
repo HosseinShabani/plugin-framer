@@ -66,3 +66,22 @@ export const clearStorage = (): void => {
     console.error("Error clearing storage:", error);
   }
 };
+
+export const saveDataStorage = <T>(key: string, data: T) => {
+  try {
+    localStorage.setItem(key, JSON.stringify(data));
+  } catch (error) {
+    console.error("Error saving into storage:", error);
+  }
+};
+export const LoadDataStorage = <T>(key: string, initialData: T): T => {
+  try {
+    const stored = localStorage.getItem(key);
+    if (stored) {
+      return JSON.parse(stored);
+    }
+  } catch (error) {
+    console.error("Error retrieving item from storage:", error);
+  }
+  return initialData;
+};

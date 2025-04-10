@@ -1,12 +1,11 @@
 import { WebsiteAnalysis } from "@framer-plugin/shared";
 
 import { Button, Card, ColorSwatch, LoadingSpinner } from "../ui";
-
-type AnalysisTabProps = {
-  analysis: WebsiteAnalysis;
-  handleAnalyzeWebsite: () => void;
-  loading: boolean;
-};
+import { framer } from "framer-plugin";
+import React, { useState } from "react";
+import { useAppContext } from "@/hooks";
+import { analyzeWebsiteText } from "@/services/apiService";
+import TextList from "../TextList";
 
 const InfoItem = ({
   title,
@@ -26,12 +25,118 @@ const InfoItem = ({
   );
 };
 
-const AnalysisTab: React.FC<AnalysisTabProps> = ({ analysis, handleAnalyzeWebsite, loading }) => {
+const findAllTexts = async (): Promise<string[]> => {
+  try {
+    const textSet = new Set<string>();
+
+    // Get all text nodes
+    const textNodes = await framer.getNodesWithType("TextNode");
+    textNodes.forEach((item) => {
+      if (item.name && item.name.trim()) {
+        textSet.add(item.name);
+      }
+    });
+
+    // Get content from collections
+    const collections = await framer.getCollections();
+    for (const col of collections) {
+      const items = await col.getItems();
+      for (const item of items) {
+        for (const key of Object.keys(item.fieldData)) {
+          const field = item.fieldData[key];
+          if (field.type === "string" && field.value && field.value.trim()) {
+            textSet.add(field.value);
+          }
+        }
+      }
+    }
+
+    return Array.from(textSet);
+  } catch (error) {
+    console.error("Error finding texts:", error);
+    return [];
+  }
+};
+
+type AnalysisTabProps = {
+  allTexts: string[];
+  setAllTexts: (data: string[]) => void;
+  setAnalysis: (data: WebsiteAnalysis | null) => void;
+  analysis: WebsiteAnalysis | null;
+};
+
+const AnalysisTab: React.FC<AnalysisTabProps> = ({
+  allTexts,
+  setAllTexts,
+  setAnalysis,
+  analysis,
+}) => {
+  const { setActiveTab } = useAppContext();
+  // UI State
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleAnalyzeWebsite = async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      // Collect all text content
+      const texts = await findAllTexts();
+      setAllTexts(texts);
+
+      if (texts.length === 0) {
+        setError("No text content found in your project. Please add some text first.");
+        setLoading(false);
+        return;
+      }
+
+      // Send texts to the backend for analysis
+      let analysis = await analyzeWebsiteText(texts);
+
+      if (Array.isArray(analysis?.targetAudience)) {
+        analysis = {
+          ...analysis,
+          targetAudience: analysis?.targetAudience.join(", "),
+        };
+      }
+
+      // Save the analysis result
+      setAnalysis(analysis);
+
+      // Switch to the generator tab
+      setActiveTab(2);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to analyze website");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   if (loading) {
     return <LoadingSpinner title="Loading Analysis..." />;
   }
+  if (!analysis) {
+    return (
+      <div className="space-y-4">
+        <p className="text-sm">
+          Click the button below to analyze your website content and generate relevant images.
+        </p>
+
+        <Button variant="primary" onClick={handleAnalyzeWebsite} isLoading={loading} fullWidth>
+          {loading ? "Analyzing..." : "Analyze Website Content"}
+        </Button>
+      </div>
+    );
+  }
+
   return (
     <div className="flex-1 overflow-y-auto">
+      {error && (
+        <div className="mb-4 rounded border border-red-100 bg-red-50 p-3 text-sm text-red-700">
+          {error}
+        </div>
+      )}
       <div className="space-y-4">
         <section>
           <Card title="Website Overview">
@@ -81,6 +186,8 @@ const AnalysisTab: React.FC<AnalysisTabProps> = ({ analysis, handleAnalyzeWebsit
           Re-analyze Content
         </Button>
       </div>
+
+      <TextList texts={allTexts} />
     </div>
   );
 };

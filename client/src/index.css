@@ -1,6 +1,7 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap");
+
 /* @import "framer-plugin/framer.css"; */
 @import "tailwindcss";
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap");
 
 @theme inline {
   --color-framer-tint: var(--framer-color-tint);

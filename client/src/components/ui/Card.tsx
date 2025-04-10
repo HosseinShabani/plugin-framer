@@ -11,7 +11,7 @@ export const Card: React.FC<CardProps> = ({ title, children, footer, className =
   return (
     <div className={`border-framer-color-divider overflow-hidden rounded-md border ${className}`}>
       {title && (
-        <div className="border-framer-color-divider border-b px-3 py-2 text-center text-sm font-bold">
+        <div className="border-framer-color-divider border-b px-3 py-2 text-center text-sm font-bold bg-framer-bg-tertiary">
           {title}
         </div>
       )}
