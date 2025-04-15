@@ -32,6 +32,8 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({ images }) => {
 
     try {
       await framer.addImage({
+        // image: 'https://www.pngmart.com/files/1/Adorable-Cat-PNG.png',
+        // image: 'https://cdn.leonardo.ai/users/f91950b7-d7e5-4ef0-8df1-7af1097af3a1/generations/2d77ae49-310c-4cb8-ac83-2f8ea8413e74/Leonardo_Kino_XL_Coffee_Latte_0.jpg',
         image: selectedImage.url,
         name: "AI Generated Image",
         altText: selectedImage.prompt,

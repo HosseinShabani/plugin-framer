@@ -5,6 +5,9 @@ import { useState } from "react";
 import { Button, Card } from "../ui";
 import { ImageGallery } from "../ImageGallery";
 import { useAppContext } from "@/hooks";
+import { ASPECT_RATIO } from "@/constants/aspect-ratio";
+import { OUTPUT_FORMAT } from "@/constants/output-format";
+import { MEGAPIXELS } from "@/constants/megapixels";
 
 type ImageGeneratorTabProps = {
   generatedImages: GeneratedImage[];
@@ -18,11 +21,22 @@ const ImageGeneratorTab: React.FC<ImageGeneratorTabProps> = ({
   setGeneratedImages,
 }) => {
   const { setActiveTab } = useAppContext();
-  const [userRequests, setUserRequests] = useState("");
-  const [imageCount, setImageCount] = useState(IMAGE_COUNT[3]);
-  const [imageStyle, setImageStyle] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const [data, setData] = useState({
+    aspectRatio: ASPECT_RATIO[0],
+    imageCount: IMAGE_COUNT[3],
+    outputFormat: OUTPUT_FORMAT[0],
+    megapixels: MEGAPIXELS[0],
+    go_fast: 1,
+    imageStyle: "",
+    userRequests: "",
+  });
+
+  const handleChangeData = (e: any) => {
+    setData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  };
 
   if (!analysis) {
     return (
@@ -49,7 +63,17 @@ const ImageGeneratorTab: React.FC<ImageGeneratorTabProps> = ({
     setError(null);
 
     try {
-      const images = await generateImages(analysis, userRequests, imageCount, imageStyle);
+      const images = await generateImages(
+        analysis,
+        data.userRequests,
+        data.imageStyle,
+
+        Boolean(data.go_fast),
+        data.megapixels,
+        Number(data.imageCount),
+        data.aspectRatio,
+        data.outputFormat
+      );
 
       // Save images to local storage
       setGeneratedImages(images);
@@ -69,9 +93,10 @@ const ImageGeneratorTab: React.FC<ImageGeneratorTabProps> = ({
             </label>
             <select
               id="imageCount"
+              name="imageCount"
               className="bg-framer-bg w-full rounded border border-gray-300 px-2 py-1 text-sm"
-              value={imageCount}
-              onChange={(e) => setImageCount(Number(e.target.value))}
+              value={data.imageCount}
+              onChange={handleChangeData}
               disabled={isGenerating}
             >
               {IMAGE_COUNT.map((count) => {
@@ -85,16 +110,100 @@ const ImageGeneratorTab: React.FC<ImageGeneratorTabProps> = ({
           </div>
 
           <div>
+            <label htmlFor="aspectRatio" className="mb-1 block text-xs font-medium">
+              Aspect Ratio
+            </label>
+            <select
+              id="aspectRatio"
+              name="aspectRatio"
+              className="bg-framer-bg w-full rounded border border-gray-300 px-2 py-1 text-sm"
+              value={data.aspectRatio}
+              onChange={handleChangeData}
+              disabled={isGenerating}
+            >
+              {ASPECT_RATIO.map((ar) => {
+                return (
+                  <option key={ar} value={ar}>
+                    {ar}
+                  </option>
+                );
+              })}
+            </select>
+          </div>
+
+          <div>
+            <label htmlFor="outputFormat" className="mb-1 block text-xs font-medium">
+              Output Format
+            </label>
+            <select
+              id="outputFormat"
+              name="outputFormat"
+              className="bg-framer-bg w-full rounded border border-gray-300 px-2 py-1 text-sm"
+              value={data.outputFormat}
+              onChange={handleChangeData}
+              disabled={isGenerating}
+            >
+              {OUTPUT_FORMAT.map((format) => {
+                return (
+                  <option key={format} value={format}>
+                    {format}
+                  </option>
+                );
+              })}
+            </select>
+          </div>
+
+          <div>
+            <label htmlFor="megapixels" className="mb-1 block text-xs font-medium">
+              Megapixels
+            </label>
+            <select
+              id="megapixels"
+              name="megapixels"
+              className="bg-framer-bg w-full rounded border border-gray-300 px-2 py-1 text-sm"
+              value={data.megapixels}
+              onChange={handleChangeData}
+              disabled={isGenerating}
+            >
+              {MEGAPIXELS.map((pixel) => {
+                return (
+                  <option key={pixel} value={pixel}>
+                    {pixel}
+                  </option>
+                );
+              })}
+            </select>
+          </div>
+
+          <div>
+            <label htmlFor="go_fast" className="mb-1 block text-xs font-medium">
+              Criteria
+            </label>
+            <select
+              id="go_fast"
+              name="go_fast"
+              className="bg-framer-bg w-full rounded border border-gray-300 px-2 py-1 text-sm"
+              value={String(data.go_fast)}
+              onChange={handleChangeData}
+              disabled={isGenerating}
+            >
+              <option value={1}>Fast</option>
+              <option value={0}>Quality</option>
+            </select>
+          </div>
+
+          <div>
             <label htmlFor="imageStyle" className="mb-1 block text-xs font-medium">
               Style (Optional)
             </label>
             <input
               id="imageStyle"
+              name="imageStyle"
               type="text"
               className="w-full rounded border border-gray-300 px-2 py-1 text-sm"
               placeholder="e.g., Minimalist, Vibrant, Corporate..."
-              value={imageStyle}
-              onChange={(e) => setImageStyle(e.target.value)}
+              value={data.imageStyle}
+              onChange={handleChangeData}
               disabled={isGenerating}
             />
           </div>
@@ -105,11 +214,12 @@ const ImageGeneratorTab: React.FC<ImageGeneratorTabProps> = ({
             </label>
             <textarea
               id="userRequests"
+              name="userRequests"
               className="w-full rounded border border-gray-300 px-2 py-1 text-sm"
               placeholder="Describe any specific requirements for the images..."
               rows={3}
-              value={userRequests}
-              onChange={(e) => setUserRequests(e.target.value)}
+              value={data.userRequests}
+              onChange={handleChangeData}
               disabled={isGenerating}
             />
           </div>

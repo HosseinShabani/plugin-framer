@@ -25,9 +25,14 @@ export type WebsiteAnalysis = z.infer<typeof websiteAnalysisSchema>;
 export const imageGenerationRequestSchema = z.object({
   websiteAnalysis: websiteAnalysisSchema,
   userRequests: z.string().optional(),
-  imageCount: z.number().min(1).max(10).default(4),
   imageStyle: z.string().optional(),
-  imageSize: z.string().optional(),
+  go_fast: z.boolean().optional().default(true),
+  megapixels: z.string().optional().default("1"),
+  num_outputs: z.number().min(1).max(6).default(4),
+  aspect_ratio: z.string().optional().default("1:1"),
+  output_format: z.string().optional().default("webp"),
+  output_quality: z.number().min(1).max(100).optional().default(80),
+  num_inference_steps: z.number().min(1).max(4).optional().default(4),
 });
 
 // Schema for generated image

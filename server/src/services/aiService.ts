@@ -105,41 +105,41 @@ Format your response as valid JSON with the following keys: theme, type, purpose
 export async function generateImages(
   websiteAnalysis: WebsiteAnalysis,
   userRequests: string = "",
-  count: number = 4,
   style: string = "",
-  size: string = "1024x1024"
+  go_fast: boolean = true,
+  megapixels: string = "1",
+  num_outputs: number = 4,
+  aspect_ratio: string = "1:1",
+  output_format: string = "webp",
+  output_quality?: number,
+  num_inference_steps?: number
 ): Promise<GeneratedImage[]> {
   try {
     const images: GeneratedImage[] = [];
 
-    // Create base prompt from analysis
-
     // Parse size dimensions
-    const [widthStr, heightStr] = size.split("x");
-    const width = parseInt(widthStr, 10) || 1024;
-    const height = parseInt(heightStr, 10) || 1024;
 
     // Generate the specified number of images
-    for (let i = 0; i < count; i++) {
+    for (let i = 0; i < num_outputs; i++) {
       const imageCategory =
         websiteAnalysis.imageNeeds[i % websiteAnalysis.imageNeeds.length];
       // const prompt = `${basePrompt}\n Please consider the following categories: ${websiteAnalysis.imageNeeds.join(
       //   ", "
       // )}`;
 
-      const prompt = `Create a professional, high-quality image that would be perfect for a ${
-        websiteAnalysis.type
-      } website about ${websiteAnalysis.theme}. 
-  The website targets ${websiteAnalysis.targetAudience} and aims to ${
-        websiteAnalysis.purpose
-      }.
-      **Please consider the following: ${imageCategory}**
-        
-  Style: ${style || websiteAnalysis.styleRecommendations}
-  Color palette: ${websiteAnalysis.colorPalette.join(", ")}
-  ${userRequests ? `Additional requirements: ${userRequests}` : ""}
-  
-  *Negative prompt: low quality, blurry, distorted, deformed, ugly, bad anatomy, watermark, text, signature, logo`;
+      const prompt = `Create a professional, high-quality, visually striking image suitable for a ${websiteAnalysis.type} website about ${websiteAnalysis.theme}. 
+        The image should be purely visual with no text, menus, or UI elements. It should focus on ${imageCategory} and appeal to ${websiteAnalysis.targetAudience}, while conveying ${websiteAnalysis.purpose}.
+
+        Key requirements:
+        - Absolutely no text, labels, or menu elements
+        - No UI components or interface-like features
+        - Pure visual composition only
+
+        Style: ${style || websiteAnalysis.styleRecommendations}
+        Color palette: ${websiteAnalysis.colorPalette.join(", ")}
+        ${userRequests ? `Additional requirements: ${userRequests}` : ""}
+
+        The image should be clean, modern, and suitable for use as a hero image or background.`;
 
       // Add negative prompt for better quality
       // const negativePrompt =
@@ -152,9 +152,11 @@ export async function generateImages(
           input: {
             prompt,
             num_outputs: 1,
-            aspect_ratio: `1:1`,
-            output_format: "png",
-            guidance_scale: 7.5,
+            aspect_ratio: aspect_ratio,
+            output_format: output_format,
+            go_fast: go_fast,
+            megapixels: megapixels,
+            // guidance_scale: 7.5,
             // negative_prompt: negativePrompt,
           },
         }
@@ -162,7 +164,7 @@ export async function generateImages(
 
       // Save each generated image and create its URL
       for (const [index, item] of Object.entries(output)) {
-        const filename = `image_${Date.now()}_${i}_${index}.png`;
+        const filename = `image_${Date.now()}_${i}_${index}.${output_format}`;
         const filePath = path.join(__dirname, "../../public/images", filename);
         await writeFile(filePath, item as string);
 

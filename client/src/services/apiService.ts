@@ -11,9 +11,7 @@ const API_ENDPOINT = "http://localhost:3000";
 /**
  * Analyzes website text content
  */
-export const analyzeWebsiteText = async (
-  texts: string[]
-): Promise<WebsiteAnalysis> => {
+export const analyzeWebsiteText = async (texts: string[]): Promise<WebsiteAnalysis> => {
   try {
     const response = await fetch(`${API_ENDPOINT}/api/analyze`, {
       method: "POST",
@@ -46,17 +44,31 @@ export const analyzeWebsiteText = async (
 export const generateImages = async (
   websiteAnalysis: WebsiteAnalysis,
   userRequests?: string,
-  imageCount: number = 4,
   imageStyle?: string,
-  imageSize: string = "1024x1024"
+
+  go_fast?: boolean,
+  megapixels?: string,
+  num_outputs?: number,
+  aspect_ratio?: string,
+  output_format?: string,
+
+  output_quality?: number,
+  num_inference_steps?: number
 ): Promise<GeneratedImage[]> => {
   try {
     const requestData: ImageGenerationRequest = {
-      websiteAnalysis,
-      userRequests,
-      imageCount,
-      imageStyle,
-      imageSize,
+      websiteAnalysis: websiteAnalysis,
+      userRequests: userRequests,
+      imageStyle: imageStyle,
+
+      go_fast: go_fast,
+      megapixels: megapixels,
+      num_outputs: num_outputs,
+      aspect_ratio: aspect_ratio,
+      output_format: output_format,
+
+      output_quality: output_quality,
+      num_inference_steps: num_inference_steps,
     };
 
     const response = await fetch(`${API_ENDPOINT}/api/generate`, {

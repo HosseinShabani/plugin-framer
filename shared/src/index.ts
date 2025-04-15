@@ -22,9 +22,16 @@ export interface WebsiteAnalysis {
 export interface ImageGenerationRequest {
   websiteAnalysis: WebsiteAnalysis;
   userRequests?: string;
-  imageCount?: number;
   imageStyle?: string;
-  imageSize?: string;
+
+  go_fast?: boolean;
+  megapixels?: string;
+  num_outputs?: number;
+  aspect_ratio?: string;
+  output_format?: string;
+  
+  output_quality?: number;
+  num_inference_steps?: number;
 }
 
 export interface GeneratedImage {

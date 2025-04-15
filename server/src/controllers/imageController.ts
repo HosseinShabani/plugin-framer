@@ -22,18 +22,28 @@ export const generateWebsiteImages = async (req: Request, res: Response) => {
     const {
       websiteAnalysis,
       userRequests,
-      imageCount = 4,
       imageStyle = "",
-      imageSize = "1024x1024",
+      go_fast = true,
+      megapixels = "1",
+      num_outputs = 4,
+      aspect_ratio = "1:1",
+      output_format = "webp",
+      output_quality = 80,
+      num_inference_steps = 4,
     } = validationResult.data;
 
     // Generate the images
     const images = await generateImages(
       websiteAnalysis,
       userRequests,
-      imageCount,
       imageStyle,
-      imageSize
+      go_fast,
+      megapixels,
+      num_outputs,
+      aspect_ratio,
+      output_format,
+      output_quality,
+      num_inference_steps
     );
 
     // Return the generated images
