@@ -127,7 +127,21 @@ export async function generateImages(
       //   ", "
       // )}`;
 
-      const prompt = `Create a professional, high-quality, visually striking image suitable for a ${websiteAnalysis.type} website about ${websiteAnalysis.theme}. 
+      const prompt2 = `Create a professional, high-quality, visually striking image suitable for a ${websiteAnalysis.type} website about ${websiteAnalysis.theme}. 
+        The image should be purely visual with no text, menus, or UI elements. It should focus on ${imageCategory} and appeal to ${websiteAnalysis.targetAudience}, while conveying ${websiteAnalysis.purpose}.
+
+        Key requirements:
+        - Absolutely no text, no labels, and no menu elements
+        - No UI components and no interface-like features
+        - Pure visual composition only
+
+        Style: ${style || websiteAnalysis.styleRecommendations}
+        Color palette: ${websiteAnalysis.colorPalette.join(", ")}
+        ${userRequests ? `Additional requirements: ${userRequests}` : ""}
+
+        The image should be clean, modern, and suitable for use as a hero image or background.`;
+
+      const prompt1 = `Create a professional, high-quality, visually striking image suitable for a ${websiteAnalysis.type} website about ${websiteAnalysis.theme}. 
         The image should be purely visual with no text, menus, or UI elements. It should focus on ${imageCategory} and appeal to ${websiteAnalysis.targetAudience}, while conveying ${websiteAnalysis.purpose}.
 
         Key requirements:
@@ -140,6 +154,52 @@ export async function generateImages(
         ${userRequests ? `Additional requirements: ${userRequests}` : ""}
 
         The image should be clean, modern, and suitable for use as a hero image or background.`;
+
+      let styleSpecificInstructions = "";
+      if (style === "Portrait") {
+        styleSpecificInstructions =
+          "The image should be a professional portrait photograph, focusing on human subjects with excellent lighting and composition.";
+      } else if (style === "Realistic") {
+        styleSpecificInstructions =
+          "The image should be a highly realistic representation, almost indistinguishable from a high-quality photograph.";
+      } else if (style === "3D Render") {
+        styleSpecificInstructions =
+          "The image should be a sophisticated 3D rendered scene with realistic lighting and textures.";
+      } else if (style === "Illustration") {
+        styleSpecificInstructions =
+          "The image should be a stylized illustration with artistic interpretation and creative composition.";
+      } else if (style === "Photo") {
+        styleSpecificInstructions =
+          "The image should be a professional, high-resolution photograph with excellent composition and lighting.";
+      } else if (style === "Vector") {
+        styleSpecificInstructions =
+          "The image should be a clean vector graphic with smooth shapes and bold colors.";
+      }
+
+      const prompt = `Create a **pure visual, text-free** ${style.toLowerCase()} image for a ${websiteAnalysis.type} website about ${websiteAnalysis.theme}.  
+
+### **❗ ABSOLUTELY NO TEXT, LABELS, OR UI ELEMENTS ❗**  
+- **Strictly prohibited:** Any words, letters, numbers, symbols, icons, buttons, menus, or interface-like elements.  
+- **If text is present, the image is WRONG.**  
+- **100% visual-only composition** focusing on ${imageCategory}.  
+
+### **Style-Specific Execution (${style}):**  
+${styleSpecificInstructions}  
+
+### **Critical Requirements:**  
+✅ **No text whatsoever**—not even hidden or subtle text.  
+✅ **No UI, HUD, menus, buttons, or icons**—completely clean.  
+✅ **Appeals to:** ${websiteAnalysis.targetAudience}  
+✅ **Conveys:** ${websiteAnalysis.purpose}  
+✅ **Color palette:** ${websiteAnalysis.colorPalette.join(", ")}  
+
+### **Additional Notes:**  
+- **Failure example:** If the image has even a single letter, number, or UI element, it fails the requirements.  
+- **Style:** ${style} (${styleSpecificInstructions})  
+${userRequests ? `- **Custom requests:** ${userRequests}` : ""}  
+
+**Final reminder: This image must be 100% text-free—DO NOT GENERATE TEXT!**`;
+      console.log(prompt);
 
       // Add negative prompt for better quality
       // const negativePrompt =

@@ -8,6 +8,7 @@ import { useAppContext } from "@/hooks";
 import { ASPECT_RATIO } from "@/constants/aspect-ratio";
 import { OUTPUT_FORMAT } from "@/constants/output-format";
 import { MEGAPIXELS } from "@/constants/megapixels";
+import { IMAGE_STYLES } from "@/constants/image-styles";
 
 type ImageGeneratorTabProps = {
   generatedImages: GeneratedImage[];
@@ -30,7 +31,8 @@ const ImageGeneratorTab: React.FC<ImageGeneratorTabProps> = ({
     outputFormat: OUTPUT_FORMAT[0],
     megapixels: MEGAPIXELS[0],
     go_fast: 1,
-    imageStyle: "",
+    imageStyle: IMAGE_STYLES[0],
+    // imageStyle: "",
     userRequests: "",
   });
 
@@ -194,6 +196,28 @@ const ImageGeneratorTab: React.FC<ImageGeneratorTabProps> = ({
 
           <div>
             <label htmlFor="imageStyle" className="mb-1 block text-xs font-medium">
+              Style
+            </label>
+            <select
+              id="imageStyle"
+              name="imageStyle"
+              className="bg-framer-bg w-full rounded border border-gray-300 px-2 py-1 text-sm"
+              value={data.imageStyle}
+              onChange={handleChangeData}
+              disabled={isGenerating}
+            >
+              {IMAGE_STYLES.map((st) => {
+                return (
+                  <option key={st} value={st}>
+                    {st}
+                  </option>
+                );
+              })}
+            </select>
+          </div>
+
+          {/* <div>
+            <label htmlFor="imageStyle" className="mb-1 block text-xs font-medium">
               Style (Optional)
             </label>
             <input
@@ -206,7 +230,7 @@ const ImageGeneratorTab: React.FC<ImageGeneratorTabProps> = ({
               onChange={handleChangeData}
               disabled={isGenerating}
             />
-          </div>
+          </div> */}
 
           <div>
             <label htmlFor="userRequests" className="mb-1 block text-xs font-medium">
