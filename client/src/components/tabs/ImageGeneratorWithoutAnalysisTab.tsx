@@ -1,27 +1,23 @@
 import { IMAGE_COUNT } from "@/constants/image-count";
-import { generateImages } from "@/services/apiService";
-import { GeneratedImage, WebsiteAnalysis } from "@framer-plugin/shared";
+import { generateImagesWithoutAnalysis } from "@/services/apiService";
+import { GeneratedImage } from "@framer-plugin/shared";
 import { useState } from "react";
 import { Button, Card } from "../ui";
 import { ImageGallery } from "../ImageGallery";
-import { useAppContext } from "@/hooks";
 import { ASPECT_RATIO } from "@/constants/aspect-ratio";
 import { OUTPUT_FORMAT } from "@/constants/output-format";
 import { MEGAPIXELS } from "@/constants/megapixels";
 import { IMAGE_STYLES } from "@/constants/image-styles";
 
-type ImageGeneratorTabProps = {
+type ImageGeneratorWithoutAnalysisTabProps = {
   generatedImages: GeneratedImage[];
   setGeneratedImages: (data: GeneratedImage[]) => void;
-  analysis: WebsiteAnalysis | null;
 };
 
-const ImageGeneratorTab: React.FC<ImageGeneratorTabProps> = ({
-  analysis,
+const ImageGeneratorWithoutAnalysisTab: React.FC<ImageGeneratorWithoutAnalysisTabProps> = ({
   generatedImages,
   setGeneratedImages,
 }) => {
-  const { setActiveTab } = useAppContext();
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -32,7 +28,6 @@ const ImageGeneratorTab: React.FC<ImageGeneratorTabProps> = ({
     megapixels: MEGAPIXELS[0],
     go_fast: 1,
     imageStyle: IMAGE_STYLES[0],
-    // imageStyle: "",
     userRequests: "",
   });
 
@@ -40,33 +35,12 @@ const ImageGeneratorTab: React.FC<ImageGeneratorTabProps> = ({
     setData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  if (!analysis) {
-    return (
-      <>
-        <div className="rounded border border-red-100 bg-red-50 p-2 text-sm text-red-500">
-          No website analysis found. Please run the analysis first.
-        </div>
-
-        <Button
-          variant="primary"
-          className="mt-4"
-          onClick={() => {
-            setActiveTab(1);
-          }}
-        >
-          Back to Analysis
-        </Button>
-      </>
-    );
-  }
-
   const handleGenerate = async () => {
     setIsGenerating(true);
     setError(null);
 
     try {
-      const images = await generateImages(
-        analysis,
+      const images = await generateImagesWithoutAnalysis(
         data.userRequests,
         data.imageStyle,
 
@@ -216,22 +190,6 @@ const ImageGeneratorTab: React.FC<ImageGeneratorTabProps> = ({
             </select>
           </div>
 
-          {/* <div>
-            <label htmlFor="imageStyle" className="mb-1 block text-xs font-medium">
-              Style (Optional)
-            </label>
-            <input
-              id="imageStyle"
-              name="imageStyle"
-              type="text"
-              className="w-full rounded border border-gray-300 px-2 py-1 text-sm"
-              placeholder="e.g., Minimalist, Vibrant, Corporate..."
-              value={data.imageStyle}
-              onChange={handleChangeData}
-              disabled={isGenerating}
-            />
-          </div> */}
-
           <div>
             <label htmlFor="userRequests" className="mb-1 block text-xs font-medium">
               Description
@@ -265,4 +223,4 @@ const ImageGeneratorTab: React.FC<ImageGeneratorTabProps> = ({
   );
 };
 
-export default ImageGeneratorTab;
+export default ImageGeneratorWithoutAnalysisTab;

@@ -8,6 +8,7 @@ import { useAppContext, usePluginStorage } from "@/hooks";
 import ImageGeneratorTab from "./components/tabs/ImageGeneratorTab";
 import { ANALYSIS_KEY, IMAGE_KEY, TEXT_KEY } from "./constants/storage-keys";
 import { GeneratedImage, WebsiteAnalysis } from "@framer-plugin/shared";
+import ImageGeneratorWithoutAnalysisTab from "./components/tabs/ImageGeneratorWithoutAnalysisTab";
 
 // Set up plugin UI
 framer.showUI({
@@ -21,21 +22,6 @@ const getProjectInfo = async () => {
     return res.name + " " + res.id;
   });
 };
-
-export function App() {
-  const { projectName, setProjectName } = useAppContext();
-  useEffect(() => {
-    getProjectInfo().then((res) => {
-      setProjectName(res);
-    });
-  }, []);
-
-  if (!projectName) {
-    return <LoadingSpinner />;
-  }
-
-  return <AISection />;
-}
 
 const AISection = () => {
   const { activeTab, setActiveTab, projectName } = useAppContext();
@@ -99,3 +85,47 @@ const AISection = () => {
     </main>
   );
 };
+
+const AISectionWithoutAnalysis = () => {
+  const { projectName } = useAppContext();
+
+  const [generatedImages, setGeneratedImages] = usePluginStorage<GeneratedImage[]>(
+    `${projectName}-${IMAGE_KEY}`,
+    []
+  );
+
+  return (
+    <main className="flex h-full flex-col p-4">
+      <header className="mb-4">
+        <h1 className="divider mb-1 text-lg font-bold">AI Image Generator</h1>
+      </header>
+
+      <div className="flex w-full flex-1 flex-col">
+        <ImageGeneratorWithoutAnalysisTab
+          generatedImages={generatedImages}
+          setGeneratedImages={setGeneratedImages}
+        />
+      </div>
+
+      <footer className="mt-4 w-full border-t pt-3 text-center text-xs text-gray-500">
+        Powered by AI • © {new Date().getFullYear()}
+      </footer>
+    </main>
+  );
+};
+
+export function App() {
+  const { projectName, setProjectName } = useAppContext();
+  useEffect(() => {
+    getProjectInfo().then((res) => {
+      setProjectName(res);
+    });
+  }, []);
+
+  if (!projectName) {
+    return <LoadingSpinner />;
+  }
+
+  return <AISectionWithoutAnalysis />;
+  return <AISection />;
+}

@@ -101,3 +101,65 @@ export const generateImages = async (
     throw error;
   }
 };
+
+/**
+ * Generates images
+ */
+export const generateImagesWithoutAnalysis = async (
+  userRequests?: string,
+  imageStyle?: string,
+
+  go_fast?: boolean,
+  megapixels?: string,
+  num_outputs?: number,
+  aspect_ratio?: string,
+  output_format?: string,
+
+  output_quality?: number,
+  num_inference_steps?: number
+): Promise<GeneratedImage[]> => {
+  try {
+    const requestData = {
+      userRequests: userRequests,
+      imageStyle: imageStyle,
+
+      go_fast: go_fast,
+      megapixels: megapixels,
+      num_outputs: num_outputs,
+      aspect_ratio: aspect_ratio,
+      output_format: output_format,
+
+      output_quality: output_quality,
+      num_inference_steps: num_inference_steps,
+    };
+
+    const response = await fetch(`${API_ENDPOINT}/api/generate/without-analysis`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestData),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+
+    const result: ServerResponse<{
+      images: GeneratedImage[];
+      message: string;
+    }> = await response.json();
+
+    if (!result.success || !result.data) {
+      throw new Error(result.error || "Failed to generate images");
+    }
+
+    return result.data.images.map((image) => ({
+      ...image,
+      url: `${API_ENDPOINT}${image.url}`,
+    }));
+  } catch (error) {
+    console.error("Error generating images:", error);
+    throw error;
+  }
+};

@@ -35,6 +35,19 @@ export const imageGenerationRequestSchema = z.object({
   num_inference_steps: z.number().min(1).max(4).optional().default(4),
 });
 
+// Schema for image generation request
+export const imageGenerationWithoutAnalysisRequestSchema = z.object({
+  userRequests: z.string().optional(),
+  imageStyle: z.string().optional(),
+  go_fast: z.boolean().optional().default(true),
+  megapixels: z.string().optional().default("1"),
+  num_outputs: z.number().min(1).max(6).default(4),
+  aspect_ratio: z.string().optional().default("1:1"),
+  output_format: z.string().optional().default("webp"),
+  output_quality: z.number().min(1).max(100).optional().default(80),
+  num_inference_steps: z.number().min(1).max(4).optional().default(4),
+});
+
 // Schema for generated image
 export const generatedImageSchema = z.object({
   url: z.string().url(),

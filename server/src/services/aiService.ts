@@ -178,27 +178,27 @@ export async function generateImages(
 
       const prompt = `Create a **pure visual, text-free** ${style.toLowerCase()} image for a ${websiteAnalysis.type} website about ${websiteAnalysis.theme}.  
 
-### **❗ ABSOLUTELY NO TEXT, LABELS, OR UI ELEMENTS ❗**  
-- **Strictly prohibited:** Any words, letters, numbers, symbols, icons, buttons, menus, or interface-like elements.  
-- **If text is present, the image is WRONG.**  
-- **100% visual-only composition** focusing on ${imageCategory}.  
+        ### **❗ ABSOLUTELY NO TEXT, LABELS, OR UI ELEMENTS ❗**  
+        - **Strictly prohibited:** Any words, letters, numbers, symbols, icons, buttons, menus, or interface-like elements.  
+        - **If text is present, the image is WRONG.**  
+        - **100% visual-only composition** focusing on ${imageCategory}.  
 
-### **Style-Specific Execution (${style}):**  
-${styleSpecificInstructions}  
+        ### **Style-Specific Execution (${style}):**  
+        ${styleSpecificInstructions}  
 
-### **Critical Requirements:**  
-✅ **No text whatsoever**—not even hidden or subtle text.  
-✅ **No UI, HUD, menus, buttons, or icons**—completely clean.  
-✅ **Appeals to:** ${websiteAnalysis.targetAudience}  
-✅ **Conveys:** ${websiteAnalysis.purpose}  
-✅ **Color palette:** ${websiteAnalysis.colorPalette.join(", ")}  
+        ### **Critical Requirements:**  
+        ✅ **No text whatsoever**—not even hidden or subtle text.  
+        ✅ **No UI, HUD, menus, buttons, or icons**—completely clean.  
+        ✅ **Appeals to:** ${websiteAnalysis.targetAudience}  
+        ✅ **Conveys:** ${websiteAnalysis.purpose}  
+        ✅ **Color palette:** ${websiteAnalysis.colorPalette.join(", ")}  
 
-### **Additional Notes:**  
-- **Failure example:** If the image has even a single letter, number, or UI element, it fails the requirements.  
-- **Style:** ${style} (${styleSpecificInstructions})  
-${userRequests ? `- **Custom requests:** ${userRequests}` : ""}  
+        ### **Additional Notes:**  
+        - **Failure example:** If the image has even a single letter, number, or UI element, it fails the requirements.  
+        - **Style:** ${style} (${styleSpecificInstructions})  
+        ${userRequests ? `- **Custom requests:** ${userRequests}` : ""}  
 
-**Final reminder: This image must be 100% text-free—DO NOT GENERATE TEXT!**`;
+        **Final reminder: This image must be 100% text-free—DO NOT GENERATE TEXT!**`;
       console.log(prompt);
 
       // Add negative prompt for better quality
@@ -216,6 +216,84 @@ ${userRequests ? `- **Custom requests:** ${userRequests}` : ""}
             output_format: output_format,
             go_fast: go_fast,
             megapixels: megapixels,
+            // guidance_scale: 7.5,
+            // negative_prompt: negativePrompt,
+          },
+        }
+      );
+
+      // Save each generated image and create its URL
+      for (const [index, item] of Object.entries(output)) {
+        const filename = `image_${Date.now()}_${i}_${index}.${output_format}`;
+        const filePath = path.join(__dirname, "../../public/images", filename);
+        await writeFile(filePath, item as string);
+
+        // Add the generated image to the results with its public URL
+        images.push({
+          url: `/images/${filename}`,
+          prompt,
+        });
+      }
+    }
+
+    return images;
+  } catch (error) {
+    console.error("Error generating images:", error);
+    throw new Error(`Failed to generate images: ${(error as Error).message}`);
+  }
+}
+
+export async function generateImagesWithoutAnalysis(
+  userRequests: string = "",
+  style: string = "",
+  go_fast: boolean = true,
+  megapixels: string = "1",
+  num_outputs: number = 4,
+  aspect_ratio: string = "1:1",
+  output_format: string = "webp",
+  output_quality: number = 80,
+  num_inference_steps: number = 4
+): Promise<GeneratedImage[]> {
+  try {
+    const images: GeneratedImage[] = [];
+
+    const styleSpecification: Record<string, string> = {
+      Portrait:
+        "The image should be a professional portrait photograph, focusing on human subjects with excellent lighting and composition.",
+      Realistic:
+        "The image should be a highly realistic representation, almost indistinguishable from a high-quality photograph.",
+      "3D Render":
+        "The image should be a sophisticated 3D rendered scene with realistic lighting and textures.",
+      Illustration:
+        "The image should be a stylized illustration with artistic interpretation and creative composition.",
+      Photo:
+        "The image should be a professional, high-resolution photograph with excellent composition and lighting.",
+      Vector:
+        "The image should be a clean vector graphic with smooth shapes and bold colors.",
+    };
+
+    // Generate the specified number of images
+    for (let i = 0; i < num_outputs; i++) {
+      const prompt = `Create a ${userRequests} image.  
+
+        ### **Style-Specific Execution (${style}):**  
+        ${styleSpecification[style]}`;
+
+      console.log(prompt);
+
+      // Call the Replicate API for image generation
+      const output: ReplicateResponse = await replicate.run(
+        IMAGE_GENERATION_MODEL,
+        {
+          input: {
+            prompt,
+            num_outputs: 1,
+            aspect_ratio: aspect_ratio,
+            output_format: output_format,
+            go_fast: go_fast,
+            megapixels: megapixels,
+            output_quality: output_quality,
+            num_inference_steps: num_inference_steps,
             // guidance_scale: 7.5,
             // negative_prompt: negativePrompt,
           },
