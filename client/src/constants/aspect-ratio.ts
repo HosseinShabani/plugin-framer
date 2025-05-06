@@ -1,4 +1,6 @@
-export const ASPECT_RATIO = [
+import { AspectRatioType } from "@/types/aspect-ratio";
+
+export const ASPECT_RATIO: AspectRatioType[] = [
   "1:1",
   "16:9",
   "21:9",

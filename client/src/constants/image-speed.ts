@@ -1,10 +1,10 @@
 export const IMAGE_SPEED = [
   {
-    value: 1,
+    value: true,
     title: "Fast",
   },
   {
-    value: 0,
+    value: false,
     title: "Quality",
   },
 ];
