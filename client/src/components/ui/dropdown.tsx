@@ -1,7 +1,8 @@
-import { useState, useRef, useEffect, ReactNode } from "react";
+import React, { useState, useRef, useEffect, ReactNode } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { createPortal } from "react-dom";
 import { cn } from "@/utils/cn";
+import { Button, ButtonProps } from "./button";
 
 interface DropdownProps {
   trigger: ReactNode | ((isOpen: boolean) => ReactNode);
@@ -195,29 +196,19 @@ export function DropdownItem({
   );
 }
 
-export const DropdownTriggerButton = ({
-  children,
-  onClick,
-  className = "",
-  isOpen,
-}: {
-  children: ReactNode;
-  onClick?: () => void;
-  className?: string;
-  isOpen?: boolean;
-}) => {
+export const DropdownTriggerButton: React.FC<
+  ButtonProps & {
+    isOpen?: boolean;
+  }
+> = ({ children, isOpen, className, ...props }) => {
   return (
-    <div
-      className={cn(
-        "flex h-9 w-fit cursor-pointer items-center rounded-3xl px-3 text-sm font-semibold whitespace-nowrap transition-all",
-        isOpen
-          ? "bg-framer-bg-tertiary"
-          : "bg-framer-bg-secondary hover:bg-framer-bg-tertiary text-framer-text-secondary",
-        className
-      )}
-      onClick={onClick}
+    <Button
+      variant="contained"
+      color="gray"
+      {...props}
+      className={cn(className, isOpen ? "relative z-[9999] brightness-90" : "")}
     >
       {children}
-    </div>
+    </Button>
   );
 };

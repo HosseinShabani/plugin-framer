@@ -15,6 +15,35 @@
   --color-framer-text-secondary: var(--framer-color-text-secondary);
   --color-framer-text-tertiary: var(--framer-color-text-tertiary);
   --color-framer-color-divider: var(--framer-color-divider);
+
+  --color-primary-50: #ececff;
+  --color-primary-100: #d5d5ff;
+  --color-primary-200: #a8a7f6;
+  --color-primary-300: #7776ee;
+  --color-primary-400: #514fe8; /* main*/
+  --color-primary-500: #3533e4;
+  --color-primary-600: #2625e4;
+  --color-primary-700: #1919cb;
+  --color-primary-800: #1115b6;
+  --color-primary-900: #0311a1;
+}
+
+@utility scrollArea {
+  &:active::-webkit-scrollbar-thumb,
+  &:focus::-webkit-scrollbar-thumb,
+  &:hover::-webkit-scrollbar-thumb {
+    visibility: visible;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: darkgrey;
+    visibility: hidden;
+  }
+  &::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+    position: fixed;
+  }
 }
 
 /* Base styles */
