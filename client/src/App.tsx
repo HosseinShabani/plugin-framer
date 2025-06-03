@@ -486,7 +486,7 @@ const UserTextInputSection = () => {
       myHeaders.append("Content-Type", "application/json");
       myHeaders.append(
         "Authorization",
-        "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1leGRraWlvb2VsbWdmdnFxdW9oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg1OTY2NTIsImV4cCI6MjA2NDE3MjY1Mn0.2bDs3GjizASzQrDrcJpprnD2EkpDvaliaNbczWZQiqw"
+        `Bearer ${import.meta.env.VITE_API_SUPABASE_KEY}`
       );
 
       const raw = JSON.stringify({
@@ -500,7 +500,7 @@ const UserTextInputSection = () => {
         redirect: "follow",
       };
 
-      fetch("https://mexdkiiooelmgfvqquoh.supabase.co/functions/v1/hello-farnood", requestOptions)
+      fetch(`${import.meta.env.VITE_API_SUPABASE_URL}/functions/v1/hello-farnood`, requestOptions)
         .then((response) => response.text())
         .then((result) => console.log(result))
         .catch((error) => console.log(error));
