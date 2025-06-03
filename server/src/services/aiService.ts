@@ -300,6 +300,9 @@ export async function generateImagesWithoutAnalysis(
         }
       );
 
+      console.log(output);
+      
+
       // Save each generated image and create its URL
       for (const [index, item] of Object.entries(output)) {
         const filename = `image_${Date.now()}_${i}_${index}.${output_format}`;

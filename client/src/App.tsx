@@ -23,6 +23,7 @@ import { Button } from "./components/ui/button";
 import LoginModal from "./components/modals/login-modal";
 import { useAuthStore } from "./context/auth";
 import EditProfileModal from "./components/modals/EditProfileModal";
+import { createClient } from "@supabase/supabase-js";
 
 framer.showUI({
   position: "top right",
@@ -413,6 +414,11 @@ const UserSection = () => {
   );
 };
 
+const supabase = createClient(
+  import.meta.env.VITE_API_SUPABASE_URL,
+  import.meta.env.VITE_API_SUPABASE_KEY
+);
+
 const UserTextInputSection = () => {
   const [text, style, go_fast, num_outputs, aspect_ratio, format, handleText] = useImageConfigStore(
     useShallow((state) => [
@@ -433,20 +439,84 @@ const UserTextInputSection = () => {
   const handleGenerate = async () => {
     toggleLoading();
     handleError("");
+    // console.log(import.meta.env.VITE_API_SUPABASE_URL, import.meta.env.VITE_API_SUPABASE_KEY);
+    // console.log(111);
 
     try {
-      const images = await generateImagesWithoutAnalysis(
-        text,
-        style,
-        go_fast,
-        "1", // megapixels,
-        num_outputs,
-        aspect_ratio,
-        format
+      // const res = await supabase.from('images').select('*')
+      // console.log(res);
+
+      // let data = new FormData();
+      // data.append("user_prompt", text);
+      // data.append("style", style);
+      // data.append("go_fast", String(go_fast));
+      // data.append("aspect_ratio", aspect_ratio);
+      // data.append("output_format", format);
+      // data.append("output_quality", "80");
+      // data.append("num_outputs", String(num_outputs));
+      // console.log(data);
+
+      // const payload = {
+      //   user_prompt: text,
+      //   style,
+      //   go_fast,
+      //   aspect_ratio,
+      //   output_format: format,
+      //   output_quality: 80,
+      //   num_outputs,
+      // };
+
+      // const res = await supabase.functions.invoke("clever-task", {
+      //   body: data,
+      //   headers: {
+      //     "Content-Type": "application/json",
+      //   },
+      //   method: "POST",
+      // });
+      // const res = await supabase.functions.invoke("hello-farnood", {
+      //   body: { name: "farnood" },
+      //   headers: {
+      //     "Content-Type": "application/json",
+      //   },
+      //   method: "POST",
+      // });
+      // console.log(res);
+
+      const myHeaders = new Headers();
+      myHeaders.append("Content-Type", "application/json");
+      myHeaders.append(
+        "Authorization",
+        "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1leGRraWlvb2VsbWdmdnFxdW9oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg1OTY2NTIsImV4cCI6MjA2NDE3MjY1Mn0.2bDs3GjizASzQrDrcJpprnD2EkpDvaliaNbczWZQiqw"
       );
 
+      const raw = JSON.stringify({
+        name: "farnood",
+      });
+
+      const requestOptions = {
+        method: "POST",
+        headers: myHeaders,
+        body: raw,
+        redirect: "follow",
+      };
+
+      fetch("https://mexdkiiooelmgfvqquoh.supabase.co/functions/v1/hello-farnood", requestOptions)
+        .then((response) => response.text())
+        .then((result) => console.log(result))
+        .catch((error) => console.log(error));
+
+      // const images = await generateImagesWithoutAnalysis(
+      //   text,
+      //   style,
+      //   go_fast,
+      //   "1", // megapixels,
+      //   num_outputs,
+      //   aspect_ratio,
+      //   format
+      // );
+
       // Save images to local storage
-      handleImages(images);
+      // handleImages(images);
     } catch (err) {
       handleError(err instanceof Error ? err.message : "Failed to generate images");
     } finally {
