@@ -193,9 +193,7 @@ const ALL_ICONS = {
       xmlns="http://www.w3.org/2000/svg"
       {...props}
     >
-      <g opacity="0.46">
-        <path d="M7 5.5L4 2.5L1 5.5" strokeWidth="1.5" strokeLinecap="round" />
-      </g>
+      <path d="M7 5.5L4 2.5L1 5.5" strokeWidth="1.5" strokeLinecap="round" />
     </svg>
   ),
 
@@ -476,9 +474,7 @@ type IconProps = SvgType & {
   name: keyof typeof ALL_ICONS;
 };
 
-const Icon: React.FC<IconProps> = ({ name, ...svgProps }) => {
+export const Icon: React.FC<IconProps> = ({ name, ...svgProps }) => {
   const IconComponent = ALL_ICONS[name];
   return <IconComponent {...svgProps} />;
 };
-
-export default Icon;

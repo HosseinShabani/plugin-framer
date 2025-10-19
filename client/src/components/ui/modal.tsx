@@ -10,7 +10,7 @@ interface DropdownProps {
   contentClassName?: string;
 }
 
-export default function Modal({ children, onClose, show, contentClassName }: DropdownProps) {
+export function Modal({ children, onClose, show, contentClassName }: DropdownProps) {
   const modalRef = useRef<HTMLDivElement>(null);
 
   const handleKeyDown = (e: KeyboardEvent) => {
@@ -53,42 +53,36 @@ export default function Modal({ children, onClose, show, contentClassName }: Dro
     },
   };
 
-  return (
-    <>
-      {show &&
-        typeof window !== "undefined" &&
-        createPortal(
-          <AnimatePresence>
-            {show && (
-              <>
-                {/* Overlay */}
-                <motion.div
-                  key="modal-overlay"
-                  className="fixed inset-0 z-[900] bg-black/80"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                />
-                {/* Modal Content */}
-                <motion.div
-                  key="modal-content"
-                  ref={modalRef}
-                  className={cn(
-                    "fixed top-1/2 left-1/2 z-[1000] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-lg bg-[var(--framer-color-bg-secondary)] shadow-lg",
-                    contentClassName
-                  )}
-                  initial="hidden"
-                  animate="visible"
-                  exit="exit"
-                  variants={contentVariants}
-                >
-                  {children}
-                </motion.div>
-              </>
+  return createPortal(
+    <AnimatePresence>
+      {typeof window !== "undefined" && show && (
+        <>
+          {/* Overlay */}
+          <motion.div
+            key="modal-overlay"
+            className="fixed inset-0 z-[900] bg-black/80"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          />
+          {/* Modal Content */}
+          <motion.div
+            key="modal-content"
+            ref={modalRef}
+            className={cn(
+              "fixed top-1/2 left-1/2 z-[1000] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-lg bg-[var(--framer-color-bg-secondary)] shadow-lg",
+              contentClassName
             )}
-          </AnimatePresence>,
-          document.body
-        )}
-    </>
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            variants={contentVariants}
+          >
+            {children}
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>,
+    document.body
   );
 }

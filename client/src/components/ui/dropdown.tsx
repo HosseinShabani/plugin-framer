@@ -139,39 +139,37 @@ export function Dropdown({
         {typeof trigger === "function" ? trigger(isOpen) : trigger}
       </div>
 
-      {isOpen &&
-        typeof window !== "undefined" &&
-        createPortal(
-          <AnimatePresence>
-            {isOpen && (
-              <>
-                <motion.div
-                  key="dropdown-content"
-                  ref={contentRef}
-                  className={cn(
-                    "overflow-hidden rounded-lg bg-[var(--framer-color-bg-secondary)] shadow-lg",
-                    contentClassName
-                  )}
-                  style={getDropdownContentStyle()}
-                  initial="hidden"
-                  animate="visible"
-                  exit="exit"
-                  variants={contentVariants}
-                >
-                  {typeof children === "function" ? children(toggleDropdown) : children}
-                </motion.div>
-                <motion.div
-                  key="dropdown-overlay"
-                  className="absolute inset-0 z-[900] bg-black/40"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                />
-              </>
-            )}
-          </AnimatePresence>,
-          document.body
-        )}
+      {createPortal(
+        <AnimatePresence>
+          {typeof window !== "undefined" && isOpen && (
+            <>
+              <motion.div
+                key="dropdown-content"
+                ref={contentRef}
+                className={cn(
+                  "overflow-hidden rounded-lg bg-[var(--framer-color-bg-secondary)] shadow-lg",
+                  contentClassName
+                )}
+                style={getDropdownContentStyle()}
+                initial="hidden"
+                animate="visible"
+                exit="exit"
+                variants={contentVariants}
+              >
+                {typeof children === "function" ? children(toggleDropdown) : children}
+              </motion.div>
+              <motion.div
+                key="dropdown-overlay"
+                className="absolute inset-0 z-[900] bg-black/40"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+              />
+            </>
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
     </div>
   );
 }
@@ -203,10 +201,10 @@ export const DropdownTriggerButton: React.FC<
 > = ({ children, isOpen, className, ...props }) => {
   return (
     <Button
-      variant="contained"
+      variant="outlined"
       color="gray"
       {...props}
-      className={cn(className, isOpen ? "relative z-[9999] brightness-90" : "")}
+      className={cn(className, isOpen ? "relative z-[9999] brightness-75" : "")}
     >
       {children}
     </Button>

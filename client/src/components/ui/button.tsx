@@ -9,6 +9,7 @@ const buttonVariants = cva(
       variant: {
         contained: "text-sm font-semibold",
         ghost: "",
+        outlined: "",
       },
       size: {
         default: "px-3 h-[34px] rounded-[59px]",
@@ -40,6 +41,12 @@ const buttonVariants = cva(
         color: "gray",
         className: "bg-framer-bg-tertiary hover:brightness-75 ",
       },
+      {
+        variant: "outlined",
+        color: "gray",
+        className:
+          "bg-framer-bg-tertiary text-framer-text/65 hover:brightness-75 border border-framer-text-tertiary/50 ",
+      },
 
       {
         variant: "ghost",
@@ -60,6 +67,7 @@ export type ButtonProps = React.ComponentProps<"button"> &
     fullWidth?: boolean;
     rightIcon?: React.ReactNode;
     leftIcon?: React.ReactNode;
+    transition?: boolean;
   };
 
 function Button({
@@ -71,6 +79,7 @@ function Button({
   rightIcon,
   leftIcon,
   children,
+  transition,
   ...props
 }: ButtonProps) {
   const Comp = "button";
@@ -78,7 +87,10 @@ function Button({
   return (
     <Comp
       data-slot="button"
-      className={cn(buttonVariants({ variant, size, color, fullWidth, className }))}
+      className={cn(
+        transition ? "transition-all duration-300" : "",
+        buttonVariants({ variant, size, color, fullWidth, className })
+      )}
       {...props}
     >
       {leftIcon && <>{leftIcon}</>}
