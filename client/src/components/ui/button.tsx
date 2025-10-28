@@ -3,7 +3,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/utils/cn";
 
 const buttonVariants = cva(
-  "inline-flex items-center gap-2 justify-center whitespace-nowrap rounded-md text-sm font-medium transition-all cursor-pointer disabled:pointer-events-none disabled:opacity-50 disabled:select-none shrink-0  outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]",
+  "inline-flex items-center gap-2 justify-center whitespace-nowrap px-3 h-[34px] rounded-[59px] text-sm font-medium transition-all cursor-pointer disabled:pointer-events-none disabled:opacity-50 disabled:select-none shrink-0  outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]",
   {
     variants: {
       variant: {
@@ -11,22 +11,23 @@ const buttonVariants = cva(
         ghost: "",
         outlined: "",
       },
-      size: {
-        default: "px-3 h-[34px] rounded-[59px]",
-        sm: "size-6 rounded-[59px]",
-      },
+
       color: {
         primary: "text-primary-400",
         gray: "",
+        secondary: "text-secondary",
       },
       fullWidth: {
         true: "w-full",
         false: "",
       },
+      transition: {
+        true: "transition-all duration-300",
+        false: "",
+      },
     },
     defaultVariants: {
       variant: "contained",
-      size: "default",
       color: "primary",
       fullWidth: false,
     },
@@ -47,6 +48,11 @@ const buttonVariants = cva(
         className:
           "bg-framer-bg-tertiary text-framer-text/65 hover:brightness-75 border border-framer-text-tertiary/50 ",
       },
+      {
+        variant: "outlined",
+        color: "secondary",
+        className: "bg-secondary/20 text-secondary hover:brightness-75 border border-secondary ",
+      },
 
       {
         variant: "ghost",
@@ -56,7 +62,7 @@ const buttonVariants = cva(
       {
         variant: "ghost",
         color: "gray",
-        className: " hover:bg-framer-bg",
+        className: " hover:bg-framer-bg-tertiary",
       },
     ],
   }
@@ -73,7 +79,6 @@ export type ButtonProps = React.ComponentProps<"button"> &
 function Button({
   className,
   variant,
-  size,
   color,
   fullWidth = false,
   rightIcon,
@@ -87,10 +92,7 @@ function Button({
   return (
     <Comp
       data-slot="button"
-      className={cn(
-        transition ? "transition-all duration-300" : "",
-        buttonVariants({ variant, size, color, fullWidth, className })
-      )}
+      className={cn(buttonVariants({ variant, color, fullWidth, transition, className }))}
       {...props}
     >
       {leftIcon && <>{leftIcon}</>}

@@ -26,6 +26,8 @@
   --color-primary-700: #1919cb;
   --color-primary-800: #1115b6;
   --color-primary-900: #0311a1;
+
+  --color-secondary: #fa9543; /* main*/
 }
 
 @utility scrollArea {
@@ -43,6 +45,14 @@
     width: 4px;
     height: 4px;
     position: fixed;
+  }
+}
+@utility no-scroll-bar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
   }
 }
 
@@ -65,4 +75,13 @@ body {
   font-synthesis: none;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }

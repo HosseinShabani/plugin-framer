@@ -1,6 +1,6 @@
 type SvgType = React.ComponentProps<"svg">;
 
-const ALL_ICONS = {
+export const ALL_ICONS = {
   regeneration: (props: SvgType) => (
     <svg
       width="14"
@@ -141,6 +141,41 @@ const ALL_ICONS = {
       </g>
     </svg>
   ),
+  x: (props: SvgType) => (
+    <svg
+      width="8"
+      height="8"
+      viewBox="0 0 8 8"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      {...props}
+    >
+      <path
+        d="M6.75 0.75L0.75 6.75M0.75 0.75L6.75 6.75"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  ),
+  "album-image": (props: SvgType) => (
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 16 16"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      {...props}
+    >
+      <path d="M4.04538 2.02321C4.43544 0.567491 5.93173 -0.296398 7.38743 0.0936569L13.9769 1.85931C15.4327 2.24937 16.2966 3.74567 15.9065 5.20138L14.1409 11.7909C14.0392 12.1705 13.8623 12.5097 13.6307 12.7969C13.5483 12.8989 13.395 12.836 13.395 12.7048V6.45C13.395 4.3264 11.6734 2.60489 9.54982 2.60489H4.0835C3.98563 2.60489 3.9144 2.51206 3.93972 2.41753L4.04538 2.02321Z" />
+      <path d="M3.93609 6.27616C3.66913 6.12204 3.32776 6.2135 3.17363 6.48047C3.01949 6.74742 3.11097 7.0888 3.37793 7.24292L3.3833 7.24605C3.65026 7.40017 3.99163 7.30871 4.14576 7.04176C4.29989 6.77474 4.20842 6.4334 3.94146 6.27927L3.93609 6.27616Z" />
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M0.0554664 13.8219C0.0190966 13.6443 0 13.4603 0 13.2718V6.44985C0 4.94279 1.22172 3.72107 2.72879 3.72107H9.55074C11.0578 3.72107 12.2795 4.94279 12.2795 6.44985V13.2718C12.2795 13.6256 12.2123 13.9637 12.0897 14.2739C11.7229 15.2026 10.8612 15.8818 9.82974 15.9865C9.73806 15.9958 9.64495 16.0007 9.55074 16.0007H2.7288C1.55546 16.0007 0.556435 15.2603 0.170611 14.2233L0.16049 14.196M5.66604 9.45373C7.04623 8.38079 9.01944 8.54988 10.1969 9.84206L11.1632 10.9025V6.44985C11.1632 5.55932 10.4413 4.83739 9.55074 4.83739H2.72879C1.83825 4.83739 1.11632 5.55932 1.11632 6.44985V12.9907L5.66604 9.45373Z"
+      />
+    </svg>
+  ),
 
   grid: (props: SvgType) => (
     <svg
@@ -207,6 +242,32 @@ const ALL_ICONS = {
       {...props}
     >
       <path d="M1 1.5L4 4.5L7 1.5" strokeWidth="1.5" strokeLinecap="round" />
+    </svg>
+  ),
+
+  "chevron-left": (props: SvgType) => (
+    <svg
+      width="8"
+      height="8"
+      viewBox="0 0 8 8"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      {...props}
+    >
+      <path d="M5.5 1L2.5 4L5.5 7" strokeWidth="1.5" strokeLinecap="round" />
+    </svg>
+  ),
+
+  "chevron-right": (props: SvgType) => (
+    <svg
+      width="8"
+      height="8"
+      viewBox="0 0 8 8"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      {...props}
+    >
+      <path d="M2.5 1L5.5 4L2.5 7" strokeWidth="1.5" strokeLinecap="round" />
     </svg>
   ),
 
@@ -342,7 +403,7 @@ const ALL_ICONS = {
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >
-      <g clip-path="url(#clip0_243_597)">
+      <g clipPath="url(#clip0_243_597)">
         <path
           d="M11.857 6.11221C11.857 5.62058 11.8171 5.26182 11.7308 4.88977H6.11682V7.10876H9.4121C9.34569 7.66021 8.98693 8.49069 8.18966 9.04873L8.17849 9.12302L9.95352 10.4981L10.0765 10.5104C11.2059 9.46731 11.857 7.93259 11.857 6.11221Z"
           fill="#4285F4"
@@ -428,6 +489,34 @@ const ALL_ICONS = {
       />
     </svg>
   ),
+  "circle-question": (props: SvgType) => (
+    <svg
+      {...props}
+      width="16"
+      height="16"
+      viewBox="0 0 16 16"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <g clipPath="url(#clip0_659_813)">
+        <path
+          d="M7.99992 14.6666C11.6818 14.6666 14.6666 11.6819 14.6666 7.99998C14.6666 4.31808 11.6818 1.33331 7.99992 1.33331C4.31802 1.33331 1.33325 4.31808 1.33325 7.99998C1.33325 11.6819 4.31802 14.6666 7.99992 14.6666Z"
+          strokeWidth="1.5"
+        />
+        <path
+          d="M7.99992 9.2518C7.99992 8.77653 8.21105 8.57407 8.57632 8.26987L8.88765 8.01053C9.27599 7.687 9.50052 7.20787 9.50052 6.70253V6.5C9.50052 5.67157 8.82865 5 7.99992 5C7.17112 5 6.49927 5.67157 6.49927 6.5M7.99992 11H8.00659"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </g>
+      <defs>
+        <clipPath id="clip0_659_813">
+          <rect width="16" height="16" fill="white" />
+        </clipPath>
+      </defs>
+    </svg>
+  ),
 
   bell: (props: SvgType) => (
     <svg
@@ -468,8 +557,66 @@ const ALL_ICONS = {
       <path d="M0.5 5.5L6.5 5.5" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   ),
+  minus: (props: SvgType) => (
+    <svg {...props} width="14" viewBox="0 0 14 2" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M1 1H12.3333" strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  ),
+  trash: (props: SvgType) => (
+    <svg
+      {...props}
+      width="16"
+      height="16"
+      viewBox="0 0 16 16"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M12.0033 14.6273H3.9966C3.7957 14.6273 3.60243 14.5504 3.4564 14.4125C3.31038 14.2745 3.22267 14.0859 3.21126 13.8853L2.64526 3.87334H13.3546L12.7886 13.8853C12.7772 14.0859 12.6895 14.2745 12.5435 14.4125C12.3974 14.5504 12.2042 14.6273 12.0033 14.6273Z"
+        stroke="currentColor"
+        strokeMiterlimit="10"
+        strokeLinecap="square"
+      />
+      <path
+        d="M5.2832 3.66334V2.10067C5.2832 1.91184 5.35822 1.73074 5.49174 1.59721C5.62527 1.46369 5.80637 1.38867 5.9952 1.38867H10.0045C10.0981 1.38858 10.1908 1.40694 10.2772 1.44268C10.3637 1.47842 10.4422 1.53085 10.5084 1.59698C10.5746 1.6631 10.6271 1.74162 10.6629 1.82805C10.6988 1.91447 10.7172 2.00711 10.7172 2.10067V3.66334"
+        stroke="currentColor"
+        strokeMiterlimit="10"
+        strokeLinecap="square"
+      />
+      <path
+        d="M6.21118 7.29733V11.8547"
+        stroke="currentColor"
+        strokeMiterlimit="10"
+        strokeLinecap="square"
+      />
+      <path
+        d="M9.78857 7.29733V11.8547"
+        stroke="currentColor"
+        strokeMiterlimit="10"
+        strokeLinecap="square"
+      />
+    </svg>
+  ),
+  "arrow-left": (props: SvgType) => (
+    <svg
+      {...props}
+      width="12"
+      height="12"
+      viewBox="0 0 12 12"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path d="M10.3333 5.66669H1" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <path
+        d="M5.66667 10.3333L1 5.66667L5.66667 1"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  ),
 };
-
+export type IconName = keyof typeof ALL_ICONS;
 type IconProps = SvgType & {
   name: keyof typeof ALL_ICONS;
 };

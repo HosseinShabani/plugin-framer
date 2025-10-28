@@ -160,7 +160,7 @@ export function Dropdown({
               </motion.div>
               <motion.div
                 key="dropdown-overlay"
-                className="absolute inset-0 z-[900] bg-black/40"
+                className="absolute inset-0 z-[900] bg-framer-text-tertiary/40"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}

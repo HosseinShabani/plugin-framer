@@ -23,18 +23,15 @@ const ColumnImages: React.FC<Props> = ({ images, handleImageClick }) => {
               className="h-full w-full object-cover transition-all duration-300 hover:scale-105 hover:opacity-80"
             />
 
-            <div className="bg-framer-bg-secondary absolute right-1.5 bottom-1.5 left-1.5 z-10 flex h-8 items-center justify-between rounded-4xl px-1.5">
-              <Button variant="contained" size="sm" transition>
-                <Icon name="add" className="stroke-white" />
+            <div className="bg-framer-bg-secondary absolute right-1.5 bottom-1.5 left-1.5 z-10 mx-auto flex h-8 w-[87px] items-center justify-between rounded-4xl px-1.5">
+              <Button variant="contained" className="size-6 p-0" transition>
+                <Icon name="add" className="size-2 stroke-white" />
               </Button>
-              <Button variant="ghost" size="sm" color="gray" transition>
-                <Icon name="regeneration" className="stroke-framer-text/50" />
+              <Button variant="ghost" className="size-6 p-0" color="gray" transition>
+                <Icon name="regeneration" className="stroke-framer-text-secondary size-4" />
               </Button>
-              <Button variant="ghost" size="sm" color="gray" transition>
-                <Icon name="upscale" className="stroke-framer-text/50" />
-              </Button>
-              <Button variant="ghost" size="sm" color="gray" transition>
-                <Icon name="download" className="stroke-framer-text/50" />
+              <Button variant="ghost" className="size-6 p-0" color="gray" transition>
+                <Icon name="download" className="stroke-framer-text-secondary size-4" />
               </Button>
             </div>
           </div>
