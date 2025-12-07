@@ -77,6 +77,7 @@ export type SelectProps = Omit<React.ComponentProps<"div">, "onChange"> &
     leftIcon?: React.ReactNode;
     options: SelectOption[];
     value?: string;
+    defaultValue?: string;
     onChange?: (value: string) => void;
     placeholder?: string;
     disabled?: boolean;
@@ -97,6 +98,7 @@ export const Select = React.forwardRef<HTMLDivElement, SelectProps>(
       leftIcon,
       options,
       value,
+      defaultValue,
       onChange,
       placeholder = "Select an option",
       disabled = false,
@@ -105,11 +107,30 @@ export const Select = React.forwardRef<HTMLDivElement, SelectProps>(
     ref
   ) => {
     const [isOpen, setIsOpen] = useState(false);
+    const [internalValue, setInternalValue] = useState<string | undefined>(() => {
+      if (value !== undefined) return value;
+      return defaultValue;
+    });
+    const isControlled = value !== undefined;
     const [position, setPosition] = useState<"bottom" | "top">("bottom");
     const triggerRef = useRef<HTMLDivElement>(null);
     const contentRef = useRef<HTMLDivElement>(null);
 
-    const selectedOption = options.find((opt) => opt.value === value);
+    useEffect(() => {
+      if (isControlled) {
+        setInternalValue(value);
+      }
+    }, [isControlled, value]);
+
+    useEffect(() => {
+      if (!isControlled && defaultValue !== undefined) {
+        setInternalValue((prev) => prev ?? defaultValue);
+      }
+    }, [defaultValue, isControlled]);
+
+    const selectedValue = isControlled ? value : internalValue;
+
+    const selectedOption = options.find((opt) => opt.value === selectedValue);
     const displayValue = selectedOption?.label || selectedOption?.item || placeholder;
 
     const toggleDropdown = () => {
@@ -158,6 +179,9 @@ export const Select = React.forwardRef<HTMLDivElement, SelectProps>(
     }, [isOpen]);
 
     const handleSelectOption = (optionValue: string) => {
+      if (!isControlled) {
+        setInternalValue(optionValue);
+      }
       onChange?.(optionValue);
       closeDropdown();
     };
@@ -273,7 +297,7 @@ export const Select = React.forwardRef<HTMLDivElement, SelectProps>(
                         option.disabled
                           ? "cursor-not-allowed opacity-50"
                           : "hover:bg-framer-tint-dimmed",
-                        option.value === value
+                        option.value === selectedValue
                           ? "bg-framer-text/20 font-medium"
                           : "text-framer-text-secondary"
                       )}
@@ -283,7 +307,7 @@ export const Select = React.forwardRef<HTMLDivElement, SelectProps>(
                         }
                       }}
                       role="option"
-                      aria-selected={option.value === value}
+                      aria-selected={option.value === selectedValue}
                       aria-disabled={option.disabled}
                     >
                       {option?.label && option.label}
