@@ -4,7 +4,6 @@ import express from "express";
 import cors from "cors";
 import path from "path";
 import { createSuccessResponse } from "@framer-plugin/shared";
-import { analyzeRoutes } from "./routes/analyze";
 import { imageRoutes } from "./routes/image";
 
 // Create Express app
@@ -27,7 +26,6 @@ app.use(express.urlencoded({ limit: "50mb", extended: true }));
 app.use("/images", express.static(path.join(__dirname, "../public/images")));
 
 // Routes
-app.use("/api/analyze", analyzeRoutes);
 app.use("/api/generate", imageRoutes);
 
 // Health check route

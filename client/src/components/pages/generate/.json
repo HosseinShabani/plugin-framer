@@ -1,0 +1,114 @@
+{
+  "fields": [
+    {
+      "name": "aspect_ratio",
+      "type": "select",
+      "label": "Aspect Ratio",
+      "rules": {},
+      "default": "1:1",
+      "options": [
+        {
+          "title": "1:1",
+          "value": "1:1"
+        },
+        {
+          "title": "16:9",
+          "value": "16:9"
+        },
+        {
+          "title": "21:9",
+          "value": "21:9"
+        },
+        {
+          "title": "3:2",
+          "value": "3:2"
+        },
+        {
+          "title": "2:3",
+          "value": "2:3"
+        },
+        {
+          "title": "4:5",
+          "value": "4:5"
+        },
+        {
+          "title": "5:4",
+          "value": "5:4"
+        },
+        {
+          "title": "3:4",
+          "value": "3:4"
+        },
+        {
+          "title": "4:3",
+          "value": "4:3"
+        },
+        {
+          "title": "9:16",
+          "value": "9:16"
+        },
+        {
+          "title": "9:21",
+          "value": "9:21"
+        }
+      ],
+      "description": "Aspect ratio for the generated image",
+      "disabledWhen": {}
+    },
+    {
+      "image_input": [],
+      "aspect_ratio": "match_input_image",
+      "size": "2K",
+      "sequential_image_generation": "disabled",
+      "max_images": 1,
+      "width": 2048,
+      "height": 2048,
+      "enhance_prompt": true
+    },
+
+    {
+      "name": "output_format",
+      "type": "select",
+      "label": "Output Format",
+      "rules": {},
+      "default": "webp",
+      "options": [
+        {
+          "title": "webp",
+          "value": "webp"
+        },
+        {
+          "title": "jpg",
+          "value": "jpg"
+        },
+        {
+          "title": "png",
+          "value": "png"
+        }
+      ],
+      "description": "Format of the output images",
+      "disabledWhen": {}
+    },
+
+    {
+      "name": "num_outputs",
+      "type": "number",
+      "label": "Num Outputs",
+      "rules": {
+        "max": {
+          "value": 4,
+          "message": "Max is 4"
+        },
+        "min": {
+          "value": 1,
+          "message": "Min is 1"
+        }
+      },
+      "default": 1,
+      "description": "Number of outputs to generate",
+      "maximum": 4,
+      "minimum": 1,
+      "disabledWhen": {}
+    }
+  ]
+}

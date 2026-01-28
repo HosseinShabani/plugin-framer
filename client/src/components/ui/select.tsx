@@ -1,334 +1,170 @@
 import * as React from "react";
-import { useState, useRef, useEffect } from "react";
-import { cva, type VariantProps } from "class-variance-authority";
-import { motion, AnimatePresence } from "motion/react";
+import * as SelectPrimitive from "@radix-ui/react-select";
+import { CheckIcon, ChevronDownIcon, ChevronUpIcon } from "lucide-react";
+
 import { cn } from "@/utils/cn";
-import { Icon } from "./Icon";
 
-const selectTriggerVariants = cva(
-  "inline-flex items-center justify-between w-full rounded-lg text-sm font-medium transition-all cursor-pointer disabled:pointer-events-none disabled:opacity-50 disabled:select-none outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]",
-  {
-    variants: {
-      variant: {
-        outlined: "border",
-        filled: "",
-      },
-      size: {
-        default: "px-3 h-12",
-        sm: "px-2 h-[28px] text-xs",
-        lg: "px-4 h-[42px]",
-      },
-      color: {
-        primary: "",
-        gray: "",
-      },
-      fullWidth: {
-        true: "w-full",
-        false: "w-auto",
-      },
-    },
-    defaultVariants: {
-      variant: "outlined",
-      size: "default",
-      color: "gray",
-      fullWidth: false,
-    },
-    compoundVariants: [
-      {
-        variant: "outlined",
-        color: "gray",
-        className:
-          "bg-framer-bg-tertiary text-framer-text/85 hover:brightness-95 border-framer-text-tertiary/50",
-      },
-      {
-        variant: "outlined",
-        color: "primary",
-        className:
-          "bg-primary-400/10 text-primary-400 hover:bg-primary-400/20 border-primary-400/50",
-      },
-      {
-        variant: "filled",
-        color: "gray",
-        className: "bg-framer-bg-tertiary text-framer-text/85 hover:brightness-95",
-      },
-      {
-        variant: "filled",
-        color: "primary",
-        className: "bg-primary-400 text-white hover:bg-primary-900",
-      },
-    ],
-  }
-);
-
-export interface SelectOption {
-  value: string;
-  label?: string;
-  disabled?: boolean;
-  item?: any;
+function Select({ ...props }: React.ComponentProps<typeof SelectPrimitive.Root>) {
+  return <SelectPrimitive.Root data-slot="select" {...props} />;
 }
 
-export type SelectProps = Omit<React.ComponentProps<"div">, "onChange"> &
-  VariantProps<typeof selectTriggerVariants> & {
-    fullWidth?: boolean;
-    label?: string;
-    helperText?: string;
-    error?: boolean;
-    errorText?: string;
-    leftIcon?: React.ReactNode;
-    options: SelectOption[];
-    value?: string;
-    defaultValue?: string;
-    onChange?: (value: string) => void;
-    placeholder?: string;
-    disabled?: boolean;
-  };
+function SelectGroup({ ...props }: React.ComponentProps<typeof SelectPrimitive.Group>) {
+  return <SelectPrimitive.Group data-slot="select-group" {...props} />;
+}
 
-export const Select = React.forwardRef<HTMLDivElement, SelectProps>(
-  (
-    {
-      className,
-      variant,
-      size,
-      color,
-      fullWidth = false,
-      label,
-      helperText,
-      error = false,
-      errorText,
-      leftIcon,
-      options,
-      value,
-      defaultValue,
-      onChange,
-      placeholder = "Select an option",
-      disabled = false,
-      ...props
-    },
-    ref
-  ) => {
-    const [isOpen, setIsOpen] = useState(false);
-    const [internalValue, setInternalValue] = useState<string | undefined>(() => {
-      if (value !== undefined) return value;
-      return defaultValue;
-    });
-    const isControlled = value !== undefined;
-    const [position, setPosition] = useState<"bottom" | "top">("bottom");
-    const triggerRef = useRef<HTMLDivElement>(null);
-    const contentRef = useRef<HTMLDivElement>(null);
+function SelectValue({ ...props }: React.ComponentProps<typeof SelectPrimitive.Value>) {
+  return <SelectPrimitive.Value data-slot="select-value" {...props} />;
+}
 
-    useEffect(() => {
-      if (isControlled) {
-        setInternalValue(value);
-      }
-    }, [isControlled, value]);
+function SelectTrigger({
+  className,
+  size = "default",
+  children,
+  ...props
+}: React.ComponentProps<typeof SelectPrimitive.Trigger> & {
+  size?: "sm" | "default";
+}) {
+  return (
+    <SelectPrimitive.Trigger
+      data-slot="select-trigger"
+      data-size={size}
+      className={cn(
+        "border-framer-text-tertiary/50 data-[placeholder]:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 aria-invalid:border-destructive hover:bg-framer-bg-tertiary/50 bg-framer-bg-tertiary flex w-fit items-center justify-between gap-2 rounded-md border px-3 py-2 text-sm whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 data-[size=default]:h-9 data-[size=sm]:h-8 *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-2 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+        className
+      )}
+      {...props}
+    >
+      {children}
+      <SelectPrimitive.Icon asChild>
+        <ChevronDownIcon className="text-framer-text/50 size-4" />
+      </SelectPrimitive.Icon>
+    </SelectPrimitive.Trigger>
+  );
+}
 
-    useEffect(() => {
-      if (!isControlled && defaultValue !== undefined) {
-        setInternalValue((prev) => prev ?? defaultValue);
-      }
-    }, [defaultValue, isControlled]);
-
-    const selectedValue = isControlled ? value : internalValue;
-
-    const selectedOption = options.find((opt) => opt.value === selectedValue);
-    const displayValue = selectedOption?.label || selectedOption?.item || placeholder;
-
-    const toggleDropdown = () => {
-      if (!disabled) {
-        setIsOpen((prev) => !prev);
-      }
-    };
-
-    const closeDropdown = () => setIsOpen(false);
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        closeDropdown();
-      }
-    };
-
-    const handleOutsideClick = (e: MouseEvent) => {
-      if (
-        triggerRef.current &&
-        !triggerRef.current.contains(e.target as Node) &&
-        contentRef.current &&
-        !contentRef.current.contains(e.target as Node)
-      ) {
-        closeDropdown();
-      }
-    };
-
-    useEffect(() => {
-      if (isOpen) {
-        // Calculate position when dropdown opens
-        calculatePosition();
-
-        // Add event listeners
-        document.addEventListener("mousedown", handleOutsideClick);
-        document.addEventListener("keydown", handleKeyDown);
-      } else {
-        // Remove event listeners
-        document.removeEventListener("mousedown", handleOutsideClick);
-        document.removeEventListener("keydown", handleKeyDown);
-      }
-
-      return () => {
-        document.removeEventListener("mousedown", handleOutsideClick);
-        document.removeEventListener("keydown", handleKeyDown);
-      };
-    }, [isOpen]);
-
-    const handleSelectOption = (optionValue: string) => {
-      if (!isControlled) {
-        setInternalValue(optionValue);
-      }
-      onChange?.(optionValue);
-      closeDropdown();
-    };
-
-    const calculatePosition = () => {
-      if (!triggerRef.current) return;
-
-      const triggerRect = triggerRef.current.getBoundingClientRect();
-      const viewportHeight = window.innerHeight;
-      const spaceBelow = viewportHeight - triggerRect.bottom;
-      const spaceAbove = triggerRect.top;
-      const dropdownHeight = 240; // max-h-[240px] from the dropdown
-
-      // Show above if there's not enough space below and more space above
-      if (spaceBelow < dropdownHeight && spaceAbove > spaceBelow) {
-        setPosition("top");
-      } else {
-        setPosition("bottom");
-      }
-    };
-
-    const contentVariants = {
-      hidden: {
-        opacity: 0,
-        y: position === "top" ? 5 : -5,
-        scale: 0.95,
-      },
-      visible: {
-        opacity: 1,
-        y: 0,
-        scale: 1,
-        transition: {
-          duration: 0.2,
-          ease: "easeOut",
-        },
-      },
-      exit: {
-        opacity: 0,
-        y: position === "top" ? 5 : -5,
-        scale: 0.95,
-        transition: {
-          duration: 0.15,
-          ease: "easeIn",
-        },
-      },
-    };
-
-    return (
-      <div ref={ref} className={cn("flex flex-col gap-1", fullWidth && "w-full")} {...props}>
-        {label && <div className="text-framer-text mb-0.5 text-xs font-medium">{label}</div>}
-        <div className="relative">
-          <div
-            ref={triggerRef}
-            onClick={toggleDropdown}
-            className={cn(
-              selectTriggerVariants({
-                variant,
-                size,
-                color,
-                fullWidth,
-                className,
-              }),
-              error && "border-red-500 focus-visible:ring-red-500/50",
-              !selectedOption && "text-framer-text/50",
-              isOpen && "brightness-95"
-            )}
-            role="button"
-            aria-haspopup="listbox"
-            aria-expanded={isOpen}
-            tabIndex={disabled ? -1 : 0}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" || e.key === " ") {
-                e.preventDefault();
-                toggleDropdown();
-              }
-            }}
-          >
-            {leftIcon && leftIcon}
-            <span className={cn("flex-1 truncate text-left", leftIcon && "pl-2")}>
-              {displayValue}
-            </span>
-            <Icon
-              name="chevron-down"
-              width={16}
-              height={16}
-              className={cn(
-                "stroke-framer-text-secondary ml-2 size-2 transition-transform duration-200",
-                isOpen && "rotate-180"
-              )}
-            />
-          </div>
-
-          <AnimatePresence>
-            {isOpen && (
-              <motion.div
-                ref={contentRef}
-                className={cn(
-                  "bg-framer-bg-secondary absolute left-0 z-50 w-full overflow-hidden rounded-lg shadow-[0px_4px_12px_3px] shadow-gray-600/30",
-                  position === "top" ? "bottom-full mb-1" : "top-full mt-1"
-                )}
-                initial="hidden"
-                animate="visible"
-                exit="exit"
-                variants={contentVariants}
-                role="listbox"
-              >
-                <div className="scrollArea max-h-[240px] overflow-y-auto py-1">
-                  {options.map((option) => (
-                    <div
-                      key={option.value}
-                      className={cn(
-                        "cursor-pointer px-3 py-2 text-sm transition-colors",
-                        option.disabled
-                          ? "cursor-not-allowed opacity-50"
-                          : "hover:bg-framer-tint-dimmed",
-                        option.value === selectedValue
-                          ? "bg-framer-text/20 font-medium"
-                          : "text-framer-text-secondary"
-                      )}
-                      onClick={() => {
-                        if (!option.disabled) {
-                          handleSelectOption(option.value);
-                        }
-                      }}
-                      role="option"
-                      aria-selected={option.value === selectedValue}
-                      aria-disabled={option.disabled}
-                    >
-                      {option?.label && option.label}
-                      {option?.item && option.item}
-                    </div>
-                  ))}
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-        {(helperText || (error && errorText)) && (
-          <span className={cn("text-[10px]", error ? "text-red-500" : "text-framer-text-tertiary")}>
-            {error ? errorText : helperText}
-          </span>
+function SelectContent({
+  className,
+  children,
+  position = "popper",
+  align = "center",
+  ...props
+}: React.ComponentProps<typeof SelectPrimitive.Content>) {
+  return (
+    <SelectPrimitive.Portal>
+      <SelectPrimitive.Content
+        data-slot="select-content"
+        className={cn(
+          "bg-popover text-popover-foreground data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 relative z-50 max-h-(--radix-select-content-available-height) min-w-[8rem] origin-(--radix-select-content-transform-origin) overflow-x-hidden overflow-y-auto rounded-md border shadow-md",
+          position === "popper" &&
+            "data-[side=bottom]:translate-y-1 data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1 data-[side=top]:-translate-y-1",
+          className
         )}
-      </div>
-    );
-  }
-);
+        position={position}
+        align={align}
+        {...props}
+      >
+        <SelectScrollUpButton />
+        <SelectPrimitive.Viewport
+          className={cn(
+            "p-1",
+            position === "popper" &&
+              "h-[var(--radix-select-trigger-height)] w-full min-w-[var(--radix-select-trigger-width)] scroll-my-1"
+          )}
+        >
+          {children}
+        </SelectPrimitive.Viewport>
+        <SelectScrollDownButton />
+      </SelectPrimitive.Content>
+    </SelectPrimitive.Portal>
+  );
+}
 
-Select.displayName = "Select";
+function SelectLabel({ className, ...props }: React.ComponentProps<typeof SelectPrimitive.Label>) {
+  return (
+    <SelectPrimitive.Label
+      data-slot="select-label"
+      className={cn("text-muted-foreground px-2 py-1.5 text-xs", className)}
+      {...props}
+    />
+  );
+}
 
-export { selectTriggerVariants };
+function SelectItem({
+  className,
+  children,
+  ...props
+}: React.ComponentProps<typeof SelectPrimitive.Item>) {
+  return (
+    <SelectPrimitive.Item
+      data-slot="select-item"
+      className={cn(
+        "focus:bg-framer-bg focus:text-framer-text [&_svg:not([class*='text-'])]:text-muted-foreground relative flex w-full cursor-default items-center gap-2 rounded-sm py-1.5 pr-8 pl-2 text-sm outline-hidden select-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 *:[span]:last:flex *:[span]:last:items-center *:[span]:last:gap-2",
+        className
+      )}
+      {...props}
+    >
+      <span className="absolute right-2 flex size-3.5 items-center justify-center">
+        <SelectPrimitive.ItemIndicator>
+          <CheckIcon className="size-4" />
+        </SelectPrimitive.ItemIndicator>
+      </span>
+      <SelectPrimitive.ItemText>{children}</SelectPrimitive.ItemText>
+    </SelectPrimitive.Item>
+  );
+}
+
+function SelectSeparator({
+  className,
+  ...props
+}: React.ComponentProps<typeof SelectPrimitive.Separator>) {
+  return (
+    <SelectPrimitive.Separator
+      data-slot="select-separator"
+      className={cn("bg-border pointer-events-none -mx-1 my-1 h-px", className)}
+      {...props}
+    />
+  );
+}
+
+function SelectScrollUpButton({
+  className,
+  ...props
+}: React.ComponentProps<typeof SelectPrimitive.ScrollUpButton>) {
+  return (
+    <SelectPrimitive.ScrollUpButton
+      data-slot="select-scroll-up-button"
+      className={cn("flex cursor-default items-center justify-center py-1", className)}
+      {...props}
+    >
+      <ChevronUpIcon className="size-4" />
+    </SelectPrimitive.ScrollUpButton>
+  );
+}
+
+function SelectScrollDownButton({
+  className,
+  ...props
+}: React.ComponentProps<typeof SelectPrimitive.ScrollDownButton>) {
+  return (
+    <SelectPrimitive.ScrollDownButton
+      data-slot="select-scroll-down-button"
+      className={cn("flex cursor-default items-center justify-center py-1", className)}
+      {...props}
+    >
+      <ChevronDownIcon className="size-4" />
+    </SelectPrimitive.ScrollDownButton>
+  );
+}
+
+export {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectScrollDownButton,
+  SelectScrollUpButton,
+  SelectSeparator,
+  SelectTrigger,
+  SelectValue,
+};

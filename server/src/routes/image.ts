@@ -1,10 +1,10 @@
 import express from "express";
-import { generateWebsiteImages, generateWebsiteImagesWithoutAnalysis } from "../controllers/imageController";
+import { generateImage, generateImageFake } from "../controllers/imageController";
 
 const router = express.Router();
 
 // POST /api/generate
-router.post("/", generateWebsiteImages);
-router.post("/without-analysis", generateWebsiteImagesWithoutAnalysis);
+router.post("/gen", generateImage);
+router.post("/gen-fake", generateImageFake);
 
 export { router as imageRoutes };

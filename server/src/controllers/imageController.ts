@@ -1,65 +1,50 @@
 import { Request, Response } from "express";
-import {
-  generateImages,
-  generateImagesWithoutAnalysis,
-} from "../services/aiService";
-import {
-  imageGenerationRequestSchema,
-  imageGenerationWithoutAnalysisRequestSchema,
-} from "../schemas";
+import Replicate from "replicate";
 
-/**
- * Controller for generating images based on website analysis
- */
-export const generateWebsiteImages = async (req: Request, res: Response) => {
+const replicate = new Replicate({
+  auth: process.env.REPLICATE_API_KEY || "",
+});
+
+export const generateImage = async (req: Request, res: Response) => {
   try {
-    // Validate the request body
-    const validationResult = imageGenerationRequestSchema.safeParse(req.body);
+    const { modelName, input } = req.body;
 
-    if (!validationResult.success) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid request data",
-        errors: validationResult.error.errors,
+    try {
+      const images: any[] = [];
+
+      const output = await replicate.run(modelName, {
+        input: input,
       });
+
+      console.log("output11: ", output);
+      console.log("output[0].url(): ", (output as any)[0].url());
+
+      // for (const [index, item] of Object.entries(output)) {
+      //   const filename = `image_${Date.now()}_.${output_format}`;
+      //   const filePath = path.join(__dirname, "../../public/images", filename);
+      //   await writeFile(filePath, item as string);
+
+      //   // Add the generated image to the results with its public URL
+      //   images.push({
+      //     url: `/images/${filename}`,
+      //     prompt,
+      //   });
+      // }
+
+      return res.status(200).json({
+        success: true,
+        data: {
+          images,
+          output,
+          message: `Successfully generated ${images.length} images`,
+        },
+      });
+    } catch (error) {
+      console.error("Error generating images:", error);
+      throw new Error(`Failed to generate images: ${(error as Error).message}`);
     }
 
-    // Extract the data from the validated request
-    const {
-      websiteAnalysis,
-      userRequests,
-      imageStyle = "",
-      go_fast = true,
-      megapixels = "1",
-      num_outputs = 4,
-      aspect_ratio = "1:1",
-      output_format = "webp",
-      output_quality = 80,
-      num_inference_steps = 4,
-    } = validationResult.data;
-
-    // Generate the images
-    const images = await generateImages(
-      websiteAnalysis,
-      userRequests,
-      imageStyle,
-      go_fast,
-      megapixels,
-      num_outputs,
-      aspect_ratio,
-      output_format,
-      output_quality,
-      num_inference_steps
-    );
-
     // Return the generated images
-    return res.status(200).json({
-      success: true,
-      data: {
-        images,
-        message: `Successfully generated ${images.length} images`,
-      },
-    });
   } catch (error) {
     console.error("Error in generateWebsiteImages:", error);
     return res.status(500).json({
@@ -70,57 +55,31 @@ export const generateWebsiteImages = async (req: Request, res: Response) => {
   }
 };
 
-export const generateWebsiteImagesWithoutAnalysis = async (
-  req: Request,
-  res: Response
-) => {
+export const generateImageFake = async (req: Request, res: Response) => {
   try {
-    // Validate the request body
-    const validationResult =
-      imageGenerationWithoutAnalysisRequestSchema.safeParse(req.body);
+    const { modelName, input } = req.body;
 
-    if (!validationResult.success) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid request data",
-        errors: validationResult.error.errors,
+    try {
+      const images: any[] = [];
+
+      const output = {
+        url: "https://replicate.delivery/czjl/ZwVXuSAmIV5gGRGXnhFSRV2xLK2w3vXxBOchv6LX4msmkCdF/out-0.jpg",
+      };
+
+      return res.status(200).json({
+        success: true,
+        data: {
+          images,
+          output,
+          message: `Successfully generated ${images.length} images`,
+        },
       });
+    } catch (error) {
+      console.error("Error generating images:", error);
+      throw new Error(`Failed to generate images: ${(error as Error).message}`);
     }
 
-    // Extract the data from the validated request
-    const {
-      userRequests,
-      imageStyle = "",
-      go_fast = true,
-      megapixels = "1",
-      num_outputs = 4,
-      aspect_ratio = "1:1",
-      output_format = "webp",
-      output_quality = 80,
-      num_inference_steps = 4,
-    } = validationResult.data;
-
-    // Generate the images
-    const images = await generateImagesWithoutAnalysis(
-      userRequests,
-      imageStyle,
-      go_fast,
-      megapixels,
-      num_outputs,
-      aspect_ratio,
-      output_format,
-      output_quality,
-      num_inference_steps
-    );
-
     // Return the generated images
-    return res.status(200).json({
-      success: true,
-      data: {
-        images,
-        message: `Successfully generated ${images.length} images`,
-      },
-    });
   } catch (error) {
     console.error("Error in generateWebsiteImages:", error);
     return res.status(500).json({

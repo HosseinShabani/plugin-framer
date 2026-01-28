@@ -1,5 +1,5 @@
 import giftImg from "@/assets/img/gift.svg";
-import { Icon } from "@/components/ui/Icon";
+import { Icon } from "@/components/icon";
 
 const GiftSection = () => {
   return (

@@ -11,6 +11,7 @@ import { RouterProvider } from "react-router/dom";
 import { lazy, Suspense } from "react";
 import { PAGE_URL } from "./constants/page-url";
 import AppLayout from "./components/layouts/app";
+import GeneratePage from "./components/pages/generate";
 
 const lazyLoadRoutes = (folderName: string) => {
   const LazyElement = lazy(() => import(`./components/pages/${folderName}/index.tsx`));
@@ -29,7 +30,7 @@ const router = createBrowserRouter([
     path: "/",
     children: [
       {
-        Component: lazyLoadRoutes("generate"),
+        Component: GeneratePage,
         path: PAGE_URL.GENERATE,
       },
       {
