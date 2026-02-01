@@ -3,6 +3,7 @@ import { Icon } from "@/components/icon";
 import { useGalleryStore } from "@/context/gallery";
 import { useShallow } from "zustand/shallow";
 import { toast } from "sonner";
+import { framer } from "framer-plugin";
 
 const InfoItem = ({ title }: { title: string | number }) => {
   return (
@@ -14,7 +15,7 @@ const InfoItem = ({ title }: { title: string | number }) => {
 
 const FEATURES = ["aspect_ratio", "output_format"];
 
-const URL = "http://127.0.0.1:54321/storage/v1/object/public/images/";
+const URL = import.meta.env.VITE_API_IMAGE_ADDRESS;
 
 const SelectedImage = () => {
   const { setImage, image } = useGalleryStore(useShallow((state) => state));
@@ -41,6 +42,22 @@ const SelectedImage = () => {
 
     document.body.removeChild(a);
     window.URL.revokeObjectURL(blobUrl);
+  };
+
+  const handleInsert = async () => {
+    if (!image?.url) {
+      return;
+    }
+
+    try {
+      await framer.addImage({
+        image: `${URL}${image?.url}`,
+        name: "My image",
+        altText: "Alt description",
+      });
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return (
@@ -84,7 +101,12 @@ const SelectedImage = () => {
       <hr className="my-2 opacity-30" />
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-1">
-          <Button variant="contained">
+          <Button
+            onClick={() => {
+              handleInsert();
+            }}
+            variant="contained"
+          >
             <Icon name="add" className="stroke-primary-foreground size-3.5" />
             Insert
           </Button>

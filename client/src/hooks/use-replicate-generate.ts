@@ -17,10 +17,15 @@ import { useMutation } from "@tanstack/react-query";
 
 export const useReplicateGenerate = () => {
   return useMutation({
-    mutationFn: async (body: { modelName: string; input: any; license: string }) => {
+    mutationFn: async (
+      body: { modelName: string; input: any; license: string; value: number },
+    ) => {
       const response = await supabase.functions.invoke("hello", {
         body: body,
       });
+      if (response.error) {
+        return response.error;
+      }
       return response.data;
     },
   });

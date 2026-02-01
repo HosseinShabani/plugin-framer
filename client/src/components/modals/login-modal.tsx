@@ -1,13 +1,15 @@
 import { useLogin } from "@/hooks/use-login";
 import { Icon } from "../icon";
 import { Button } from "../ui/button";
-import { Dialog, DialogHeader, DialogContent, DialogTitle } from "../ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
 import { ScrollArea } from "../ui/scroll-area";
 import logo from "@/assets/img/icon.svg";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useAuthStore } from "@/context/auth";
 import { useShallow } from "zustand/react/shallow";
+import { useNavigate } from "react-router";
+import { PAGE_URL } from "@/constants/page-url";
 
 type Props = {
   show: boolean;
@@ -15,6 +17,7 @@ type Props = {
 };
 
 const LoginModal: React.FC<Props> = ({ onClose, show }) => {
+  const navigate = useNavigate();
   const [text, setText] = useState("");
 
   const { handleLicense } = useAuthStore(useShallow((state) => state));
@@ -32,6 +35,7 @@ const LoginModal: React.FC<Props> = ({ onClose, show }) => {
         onSuccess: (res) => {
           handleLicense(res.data);
           toast.success("Login Successful");
+          navigate(PAGE_URL.GENERATE);
           onClose();
           setText("");
         },
@@ -39,19 +43,28 @@ const LoginModal: React.FC<Props> = ({ onClose, show }) => {
           console.log(error);
           toast.error("Invalid license key");
         },
-      }
+      },
     );
   };
 
   return (
     <Dialog open={show} onOpenChange={onClose}>
-      <DialogContent showCloseButton={false} className="max-w-[350px] border-none">
+      <DialogContent
+        showCloseButton={false}
+        className="max-w-[350px] border-none"
+      >
         <DialogHeader>
           <DialogTitle>
             <div className="mx-auto mb-5 flex w-[221px] flex-col items-center justify-center">
-              <img className="h-[51px] w-[51px] rounded-2xl" src={logo} alt="logo" />
+              <img
+                className="h-[51px] w-[51px] rounded-2xl"
+                src={logo}
+                alt="logo"
+              />
 
-              <h3 className="mt-2 text-center text-xl font-semibold">Welcome to EFEX!</h3>
+              <h3 className="mt-2 text-center text-xl font-semibold">
+                Welcome to EFEX!
+              </h3>
               <h5 className="text-framer-text/60 text-center text-xs font-medium">
                 Enter your license key
               </h5>
@@ -89,8 +102,13 @@ const LoginModal: React.FC<Props> = ({ onClose, show }) => {
               onClick={handleGetLicense}
               className="flex cursor-pointer items-baseline justify-center gap-1 hover:underline"
             >
-              <p className="text-framer-text mt-1 text-xs font-medium">Get Yours Now</p>
-              <Icon name="arrow-up-right" className="stroke-framer-text/70 size-2" />
+              <p className="text-framer-text mt-1 text-xs font-medium">
+                Get Yours Now
+              </p>
+              <Icon
+                name="arrow-up-right"
+                className="stroke-framer-text/70 size-2"
+              />
             </div>
           </div>
         </ScrollArea>

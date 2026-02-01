@@ -4,19 +4,17 @@ import { useController, UseFormReturn } from "react-hook-form";
 import { Field, FieldError } from "@/components/ui/field";
 import { useAiModalStore } from "@/context/ai-modal";
 import { useShallow } from "zustand/shallow";
-import { TextInputType } from "@/types/input-types";
 
 type Props = {
-  input: TextInputType;
   form: UseFormReturn<any>;
 };
-const UserPromptInput = ({ form, input }: Props) => {
+const UserPromptInput = ({ form }: Props) => {
   const { toggle, ai } = useAiModalStore(useShallow((state) => state));
 
   const { field, fieldState } = useController({
-    name: input.name,
+    name: ai!.prompt.name,
     control: form.control,
-    rules: input?.rules,
+    rules: ai?.prompt?.rules,
   });
 
   return (
@@ -29,10 +27,8 @@ const UserPromptInput = ({ form, input }: Props) => {
             onBlur={field.onBlur}
             disabled={field.disabled}
             aria-invalid={fieldState.invalid}
-            placeholder={
-              ai?.prompt.placeholder ||
-              "e.g. A cat is sitting on a table eating fish meet. We support all languages."
-            }
+            placeholder={ai?.prompt.placeholder ||
+              "e.g. A cat is sitting on a table eating fish meet. We support all languages."}
             className="scrollArea placeholder:text-framer-text-secondary/60 h-full w-full resize-none border-none outline-0"
             onChange={(e) => {
               field.onChange(e);
@@ -42,7 +38,12 @@ const UserPromptInput = ({ form, input }: Props) => {
           />
 
           <div className="absolute bottom-3 left-3.5">
-            <Button variant="outline" type="button" onClick={toggle} color="gray">
+            <Button
+              variant="outline"
+              type="button"
+              onClick={toggle}
+              color="gray"
+            >
               <span>{ai?.title}</span>
               <Icon name="chevron-down" className="stroke-framer-text size-2" />
             </Button>
@@ -51,7 +52,10 @@ const UserPromptInput = ({ form, input }: Props) => {
       </div>
 
       {fieldState.invalid && (
-        <FieldError className="-mt-2 mr-4 text-xs" errors={[fieldState.error]} />
+        <FieldError
+          className="-mt-2 mr-4 text-xs"
+          errors={[fieldState.error]}
+        />
       )}
     </Field>
   );

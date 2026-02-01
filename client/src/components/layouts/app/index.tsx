@@ -1,4 +1,4 @@
-import { Link, Outlet, useLocation } from "react-router";
+import { Link, Navigate, Outlet, useLocation } from "react-router";
 import { Icon, IconName } from "../../icon";
 import { PAGE_URL } from "@/constants/page-url";
 import { Button } from "../../ui/button";
@@ -9,7 +9,8 @@ import {
 } from "@/components/ui/tooltip";
 import { useGetActions } from "@/hooks/use-get-actions";
 import { numberWithCommasEn } from "@/utils/number-with-commas-en";
-
+import { useAuthStore } from "@/context/auth";
+import { useShallow } from "zustand/shallow";
 
 const MENU_ITEMS: { icon: IconName; label: string; href: string }[] = [
   {
@@ -41,8 +42,16 @@ const MENU_ITEMS: { icon: IconName; label: string; href: string }[] = [
 ];
 
 const AppLayout = () => {
+  const { license } = useAuthStore(useShallow((state) => state));
+  if (!license?.license) {
+    return <Navigate to={PAGE_URL.LOGIN} replace />;
+  }
+
+  return <Layout />;
+};
+const Layout = () => {
   const location = useLocation();
-  const { data: actions, isSuccess } = useGetActions({});
+  const { data: actions, isSuccess, isPending } = useGetActions({});
 
   return (
     <div className="flex h-dvh w-full">
@@ -66,34 +75,37 @@ const AppLayout = () => {
         </div>
 
         <div className="mt-auto">
-          <Button
-            variant="outline"
-            loading={ !isSuccess}
-            className="relative px-2.5"
-            color="secondary"
-            fullWidth
-          >
-            <Icon name="magic-wand" className="fill-secondary size-2.5" />
-            {actions && (
-              <span>{numberWithCommasEn(actions.totalTokens)}</span>
-            )}
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <span className="cursor-pointer">
-                  <Icon
-                    name="circle-question"
-                    className="stroke-secondary ml-auto size-4"
-                  />
-                </span>
-              </TooltipTrigger>
-              <TooltipContent
-                classNameArrow="bg-framer-bg fill-framer-bg"
-                className="bg-framer-bg text-framer-text shadow-framer-text/20 shadow-md"
+          {!isPending &&
+            (
+              <Button
+                variant="outline"
+                loading={!isSuccess}
+                className="relative px-2.5"
+                color="secondary"
+                fullWidth
               >
-                <span>credit amount</span>
-              </TooltipContent>
-            </Tooltip>
-          </Button>
+                <Icon name="magic-wand" className="fill-secondary size-2.5" />
+                {actions && (
+                  <span>{numberWithCommasEn(actions.totalTokens)}</span>
+                )}
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="cursor-pointer">
+                      <Icon
+                        name="circle-question"
+                        className="stroke-secondary ml-auto size-4"
+                      />
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent
+                    classNameArrow="bg-framer-bg fill-framer-bg"
+                    className="bg-framer-bg text-framer-text shadow-framer-text/20 shadow-md"
+                  >
+                    <span>credit amount</span>
+                  </TooltipContent>
+                </Tooltip>
+              </Button>
+            )}
         </div>
       </div>
       <div className="no-scroll-bar border-t-framer-text-tertiary/50 h-dvh w-full min-w-[400px] overflow-y-auto border-t px-8 py-[26px]">

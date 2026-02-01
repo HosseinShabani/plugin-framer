@@ -32,28 +32,41 @@ const SelectInput = ({ form, input }: Props) => {
           {input.label}
         </FieldLabel>
       )}
-      <Select name={field.name} value={field.value} onValueChange={field.onChange}>
+      <Select
+        name={field.name}
+        value={field.value}
+        onValueChange={field.onChange}
+      >
         <SelectTrigger
           aria-invalid={fieldState.invalid}
           className={cn(
             "text-framer-text !h-12 w-full cursor-pointer text-sm font-medium",
-            input.props?.className
+            input.props?.className,
           )}
           {...props}
         >
           <SelectValue placeholder={input.placeholder || ""} />
         </SelectTrigger>
-        <SelectContent position="popper" className="bg-framer-bg-tertiary text-framer-text">
+        <SelectContent
+          position="popper"
+          className="bg-framer-bg-tertiary text-framer-text"
+        >
           <SelectGroup>
             {input.options?.map((option, i) => (
-              <SelectItem disabled={option.disabled} key={i} value={option.value}>
+              <SelectItem
+                disabled={option.disabled}
+                key={i}
+                value={option.value}
+              >
                 {option.title}
               </SelectItem>
             ))}
           </SelectGroup>
         </SelectContent>
       </Select>
-      {fieldState.invalid && <FieldError className="mr-4 text-xs" errors={[fieldState.error]} />}
+      {fieldState.invalid && (
+        <FieldError className="mr-4 text-xs" errors={[fieldState.error]} />
+      )}
       {input.description && (
         <FieldDescription className="text-framer-text-tertiary text-xs font-medium">
           {input.description}

@@ -19,8 +19,6 @@ import LoadingSkeleton from "./loading-skeleton";
 import { useEffect } from "react";
 import { AIModel } from "@/types/ai-model";
 import { useReplicateGenerate } from "@/hooks/use-replicate-generate";
-import LoginModal from "@/components/modals/login-modal";
-import { useDisclosure } from "@/hooks/use-disclosure";
 import { useAuthStore } from "@/context/auth";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
@@ -34,27 +32,37 @@ const removeEmptyFields = (data: FieldValues): FieldValues => {
 
 const GeneratePage = () => {
   const queryClient = useQueryClient();
-  const { ai, setAi } = useAiModalStore(useShallow((state) => state));
+  const { ai, setAi, toggle } = useAiModalStore(useShallow((state) => state));
   const { license } = useAuthStore(useShallow((state) => state));
-
-  const { open, toggle } = useDisclosure();
-  const form = useForm();
 
   const { data, isSuccess } = useGetAiModels({});
   const replicateGenerateMutation = useReplicateGenerate();
 
   useEffect(() => {
-    if (isSuccess) {
-      let selectedAi = {} as AIModel;
-      if (!ai) {
-        selectedAi = data?.[0];
-      } else if (data?.some((model) => model.id === ai.id)) {
-        selectedAi = data?.find((model) => model.id === ai.id) as AIModel;
-      }
-      setAi(selectedAi);
-      form.reset(selectedAi.default_values);
+    if (!isSuccess) return;
+
+    let selectedAi: AIModel | null;
+
+    if (!ai || !data.some((item) => item.id === ai?.id)) {
+      selectedAi = data[0];
+    } else {
+      selectedAi = data.find((model) => model.id === ai.id) ?? null;
     }
-  }, [isSuccess, ai, data]);
+
+    if (!selectedAi) return;
+
+    if (ai?.id !== selectedAi.id) {
+      setAi(selectedAi);
+    }
+  }, [isSuccess, data, ai?.id]);
+
+  const form = useForm({
+    values: {
+      ...ai?.default_values,
+    },
+  });
+
+  const value = Math.floor(Math.random() * (19 - 8 + 1) + 8)
 
   const onSubmit = (data: FieldValues) => {
     const filteredData = removeEmptyFields(data);
@@ -72,6 +80,7 @@ const GeneratePage = () => {
         modelName: ai.name,
         input: filteredData,
         license: license?.license,
+        value: value,
       },
       {
         onSuccess: (_res) => {
@@ -85,20 +94,23 @@ const GeneratePage = () => {
     );
   };
 
+  if (!isSuccess) {
+    return <LoadingSkeleton />;
+  }
+
   return (
     <>
       <ChooseAiModal />
-      <LoginModal show={open} onClose={toggle} />
-      <Button onClick={toggle}>{license ? license.license : "Login"}</Button>
-      {isSuccess && ai
-        ? (
-          <div className="">
-            <LogoTitle />
-            <GiftSection />
 
+      <div className="">
+        <LogoTitle />
+        <GiftSection />
+
+        {ai && !!Object.keys(ai).length
+          ? (
             <form onSubmit={form.handleSubmit(onSubmit)}>
               <div className="grid grid-cols-1 gap-6">
-                <UserPromptInput form={form} input={ai.prompt} />
+                <UserPromptInput form={form} />
 
                 <FormInputs inputs={ai.inputs.fields} form={form} />
 
@@ -112,7 +124,10 @@ const GeneratePage = () => {
                         </span>
                       </AccordionTrigger>
                       <AccordionContent>
-                        <FormInputs inputs={ai.advance.fields} form={form} />
+                        <FormInputs
+                          inputs={ai.advance.fields}
+                          form={form}
+                        />
                       </AccordionContent>
                       <hr className="border-framer-text/20" />
                     </AccordionItem>
@@ -139,14 +154,27 @@ const GeneratePage = () => {
 
               <div className="flex justify-end">
                 <div className="bg-framer-bg-secondary mt-3.5 flex items-center gap-1 rounded-full px-2 py-0.5">
-                  <Icon name="magic-wand" className="fill-secondary size-2.5" />
-                  <span>{15} credits will be charged</span>
+                  <Icon
+                    name="magic-wand"
+                    className="fill-secondary size-2.5"
+                  />
+                  <span>{value} credits will be charged</span>
                 </div>
               </div>
             </form>
-          </div>
-        )
-        : <LoadingSkeleton />}
+          )
+          : (
+            <Button
+              variant="contained"
+              type="button"
+              onClick={toggle}
+              color="primary"
+              fullWidth
+            >
+              Select AI
+            </Button>
+          )}
+      </div>
     </>
   );
 };

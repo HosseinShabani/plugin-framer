@@ -5,14 +5,14 @@ import { cn } from "@/utils/cn";
 import { useGalleryStore } from "@/context/gallery";
 import { useShallow } from "zustand/shallow";
 import { IGalleryImage } from "@/types/gallery-image";
+import { framer } from "framer-plugin";
 
 interface Props {
   // images: GeneratedImage[];
   images: IGalleryImage[];
 }
 
-const URL =
-  "http://127.0.0.1:54321/storage/v1/object/public/images/";
+const URL = import.meta.env.VITE_API_IMAGE_ADDRESS;
 
 const transition = "transition-all duration-200 group-hover:scale-75";
 
@@ -21,24 +21,34 @@ const ColumnImages: React.FC<Props> = ({ images }) => {
 
   const downloadImage = async (path: string) => {
     const imageUrl = `${URL}${path}`;
-  
+
     const response = await fetch(imageUrl);
     const blob = await response.blob();
-  
+
     const blobUrl = window.URL.createObjectURL(blob);
-  
+
     const a = document.createElement("a");
     a.href = blobUrl;
     a.download = path.split("/").pop() || "image.png";
-  
+
     document.body.appendChild(a);
     a.click();
-  
+
     document.body.removeChild(a);
     window.URL.revokeObjectURL(blobUrl);
   };
-  
 
+  const handleInsert = async (path: string) => {
+    try {
+      await framer.addImage({
+        image: `${URL}${path}`,
+        name: "My image",
+        altText: "Alt description",
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  };
   return (
     <div className="grid h-fit gap-2">
       {images.map((image, index) => {
@@ -55,7 +65,11 @@ const ColumnImages: React.FC<Props> = ({ images }) => {
             />
 
             <div className="bg-framer-bg absolute right-1.5 bottom-1.5 left-1.5 z-10 mx-auto flex h-8 w-[87px] items-center justify-between rounded-4xl px-1.5">
-              <Button variant="contained" size="icon-sm">
+              <Button
+                onClick={() => handleInsert(image.url)}
+                variant="contained"
+                size="icon-sm"
+              >
                 <Icon name="add" className="size-2 stroke-white" />
               </Button>
               <Button
